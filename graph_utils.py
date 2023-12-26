@@ -158,7 +158,7 @@ def update_graph(selected_cidade, data, G, pos):
     else:
         filtered_df = data[data['mun_noti'] == selected_cidade]
         include_edges = True
-
+    
     G_selected = create_graph(filtered_df)
     pos_selected = nx.get_node_attributes(G_selected, 'pos')
 
@@ -171,15 +171,25 @@ def update_graph(selected_cidade, data, G, pos):
     else:
         traces = [node_trace_selected]
 
+    if selected_cidade != 'Todas':
+        # Ajuste para selecionar o nome correto do município
+        selected_city_name = filtered_df['nome_noti'].iloc[0]
+        # Adicionando o número de notificações ao título
+        total_notifications = filtered_df['notifications'].sum()
+        title = f'Município Selecionado: {selected_city_name}<br>Total de Notificações: {total_notifications}'
+    else:
+        selected_city_name = "Todas as cidades"
+        title = f'Município Selecionado: {selected_city_name}'
+
     return {
         'data': traces,
         'layout': {
             'mapbox': {
                 'center': dict(lat=filtered_df['latitude_noti'].mean(), lon=filtered_df['longitude_noti'].mean()),
-                'zoom': 5,
+                'zoom': 3.8,
                 'style': "open-street-map",
             },
-            'title': f'(Selecionado: {selected_cidade})',
+            'title': title,
             'height': 600,
             'width': 600,
         }

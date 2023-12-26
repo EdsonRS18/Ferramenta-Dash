@@ -32,7 +32,7 @@ def create_layout(df):
 
     hide_matching_checkbox = dcc.Checklist(
         id='hide-matching-municipality',
-        options=[{'label': 'Ocultar Município Mun_noti = Mun_infe', 'value': 'hide'}],
+        options=[{'label': 'Ocultar notificações do municipio nele mesmo', 'value': 'hide'}],
         value=[],
         style={'margin-top': '10px'}
     )

@@ -51,9 +51,12 @@ def update_graph_callback(selected_cidade, click_data, show_all_clicks, df, G, p
 
         if not filtered_df.empty:
             total_notifications_mun_noti = filtered_df['notificacoes_total'].iloc[0]
+            selected_city_name = filtered_df['nome_noti'].iloc[0]  # Obtaining the selected city's name
         else:
             total_notifications_mun_noti = 0
+            selected_city_name = "Selected Municipality"
 
+        # Build the trace_mun_infe
         trace_mun_infe = go.Bar(
             y=dados_grafico_colunas['nome_infe'],
             x=dados_grafico_colunas['notifications'],
@@ -63,12 +66,13 @@ def update_graph_callback(selected_cidade, click_data, show_all_clicks, df, G, p
             name='mun_infe',
         )
 
+        # Atualize o título para incluir o nome do município selecionado
         grafico_colunas = {
             'data': [trace_mun_infe],
             'layout': {
-                'title': f'TOP 10 Municípios de Infecção (Relacionado a {selected_cidade})',
+                'title': f'TOP 10 Municípios de Infecção (Relacionado a {selected_city_name})',
                 'height': 600,
-                'width': 500,
+                'width': 600,
                 'yaxis': {
                     'tickangle': 0,
                     'tickmode': 'array',
