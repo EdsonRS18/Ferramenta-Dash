@@ -176,7 +176,7 @@ def update_graph(selected_cidade, data, G, pos):
         selected_city_name = filtered_df['nome_noti'].iloc[0]
         # Adicionando o número de notificações ao título
         total_notifications = filtered_df['notifications'].sum()
-        title = f'Município Selecionado: {selected_city_name}<br>Total de Notificações: {total_notifications}'
+        title = f'Município Selecionado: {selected_city_name}'
     else:
         selected_city_name = "Todas as cidades"
         title = f'Município Selecionado: {selected_city_name}'
@@ -186,11 +186,11 @@ def update_graph(selected_cidade, data, G, pos):
         'layout': {
             'mapbox': {
                 'center': dict(lat=filtered_df['latitude_noti'].mean(), lon=filtered_df['longitude_noti'].mean()),
-                'zoom': 3.8,
+                'zoom': 3.4,
                 'style': "open-street-map",
             },
             'title': title,
-            'height': 600,
-            'width': 600,
+            'height': 700,
+            'width': 700,
         }
     }

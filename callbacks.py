@@ -3,7 +3,6 @@ import dash_bootstrap_components as dbc
 from dash import dcc
 import plotly.graph_objects as go
 from graph_utils import update_graph
-from data_utils import load_data, create_graph
 
 def update_graph_callback(selected_cidade, click_data, show_all_clicks, df, G, pos, hide_matching_municipality=None, search_input=None):
     print(f"Selected city: {selected_cidade}")
@@ -36,8 +35,8 @@ def update_graph_callback(selected_cidade, click_data, show_all_clicks, df, G, p
             'data': [],
             'layout': {
                 'title': 'Notificações por Município de Infecção',
-                'height': 600,
-                'width': 600,
+                'height': 700,
+                'width': 700,
             }
         }
     else:
@@ -71,15 +70,17 @@ def update_graph_callback(selected_cidade, click_data, show_all_clicks, df, G, p
             'data': [trace_mun_infe],
             'layout': {
                 'title': f'TOP 10 Municípios de Infecção (Relacionado a {selected_city_name})',
-                'height': 600,
-                'width': 600,
+                'height': 700,
+                'width': 700,
                 'yaxis': {
-                    'tickangle': 0,
-                    'tickmode': 'array',
+                    'tickmode': 'linear',  # Define o modo de ticks como linear
                     'tickvals': dados_grafico_colunas['nome_infe'],
                     'ticktext': dados_grafico_colunas['nome_infe'],
+                    'dtick': 1,  # Ajusta o espaçamento entre os ticks
+                    'automargin': True,  # Ajusta automaticamente as margens para evitar cortes
                 },
                 'xaxis': {'title': 'Notificações'},
+                'margin': {'l': 150},  # Aumenta a margem esquerda para acomodar os nomes
             }
         }
 
