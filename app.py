@@ -1,10 +1,14 @@
 # Importação de bibliotecas necessárias
 from dash import Dash, html, dcc, Input, Output
-import dash_bootstrap_components as dbc 
+from dash.dependencies import Input, Output
+import pandas as pd
 from data_utils import load_data, create_graph
 import networkx as nx
+import dash_bootstrap_components as dbc 
+# Importação de funções personalizadas
+import malaria_layout 
+import info_layout
 import layout
-import malaria_layout
 import callbacks
 
 external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css']
@@ -12,61 +16,100 @@ external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/
 app = Dash(__name__, external_stylesheets=external_stylesheets, suppress_callback_exceptions=True)
 
 # Carregar os dados
-df = load_data('teste.csv', nrows=15000)
+df = load_data('Definitivo.csv', nrows=15000)
 df['notificacoes_proprias'] = df.groupby('mun_noti')['notifications'].transform('sum')
-df['notificacoes_total'] = df['notificacoes_proprias'].groupby(df['mun_noti']).transform('sum')
+df['notificacoes_total'] = df.groupby('mun_noti')['notifications'].transform('sum')
 G = create_graph(df)
 pos = nx.get_node_attributes(G, 'pos')
 node_color = ['blue' if node in df['mun_noti'].values else 'green' for node in G.nodes()]
 
-# Definição dos layouts
+# Modificando o layout da página principal
 layout_principal = html.Div([
-    layout.create_layout(df),  # Layout principal
+    # Adicionando botões de navegação
+    html.Div([
+        dcc.Link(dbc.Button("Ir para pagina malaria", color="primary"), href="/pagina_malaria"),
+        dcc.Link(dbc.Button("Ir para Outra Página", color="primary"), href="/outra_pagina")
+    ], style={'margin-top': '20px'}),  # Adicionei a vírgula aqui
+    
+    layout.create_layout(df)  # Restante do layout principal
 ])
 
+# Modificando o layout da página de malária
 pagina_malaria = html.Div([
     malaria_layout.create_malaria_layout(df),  # Página sobre malária
+
+    # Adicionando botões de navegação
+    html.Div([
+        dcc.Link(dbc.Button("Ir para Painel", color="primary"), href="/"),
+        dcc.Link(dbc.Button("Ir para Outra Página", color="primary"), href="/outra_pagina")
+    ], style={'margin-top': '20px'})
 ])
 
-# Callback para alternar entre páginas
-@app.callback(Output('page-content', 'children'), [Input('btn-navegacao', 'n_clicks')])
-def alternar_paginas(n_clicks):
-    if n_clicks is None:
-        return layout_principal  # Define a página inicial
+# Modificando o layout da outra página
+outra_pagina = html.Div([
+    info_layout.create_info_layout(df),  # Página sobre malária
 
-    if n_clicks % 2 == 0:  # Alternar entre as páginas a cada clique no botão
-        return layout_principal
-    else:
-        return pagina_malaria
+    # Adicionando botões de navegação
+    html.Div([
+        dcc.Link(dbc.Button("Ir para Painel", color="primary"), href="/"),
+        dcc.Link(dbc.Button("Ir para Malária", color="primary"), href="/pagina_malaria")
+    ], style={'margin-top': '20px'})
+])
 
-# Layout completo da aplicação com o botão de navegação
+# Layout completo da aplicação
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
-    dbc.Button("Alternar Páginas", id='btn-navegacao', color="primary", className="mr-1"),
     html.Div(id='page-content')
 ])
 
-# Callback para atualização dos componentes
 @app.callback(
-    Output('grafo-direcional', 'figure'),
-    Output('grafico-colunas', 'figure'),
-    Output('cidade-dropdown', 'value'),
-    Output('show-all-button', 'n_clicks'),
-    [Input('cidade-dropdown', 'value')],
-    [Input('grafo-direcional', 'clickData')],
-    [Input('show-all-button', 'n_clicks')],
-    [Input('hide-matching-municipality', 'value')],
-    [Input('search-input', 'value')]
+    Output('page-content', 'children'),
+    [Input('url', 'pathname')]
 )
+def display_page(pathname):
+    if pathname == '/':
+        return layout_principal
+    elif pathname == '/pagina_malaria':
+        return pagina_malaria
+    elif pathname == '/outra_pagina':
+        return outra_pagina
+    else:
+        return '404 - Página não encontrada'
 
-    
-def update_graph_callback(selected_cidade, click_data, show_all_clicks, hide_matching_municipality, search_input):
-    # Lógica para processar os inputs e atualizar os componentes
-    # Esta função retorna os valores atualizados para os componentes especificados nos Outputs
-    if search_input in (None, ''):
+@app.callback(
+    [
+        Output('grafo-direcional', 'figure'),
+        Output('grafico-colunas', 'figure'),
+        Output('cidade-dropdown', 'value'),
+        Output('show-all-button', 'n_clicks')
+    ],
+    [
+        Input('cidade-dropdown', 'value'),
+        Input('grafo-direcional', 'clickData'),
+        Input('show-all-button', 'n_clicks'),
+        Input('hide-matching-municipality', 'value'),
+        Input('search-input', 'value'),
+        Input('ano-dropdown', 'value')  # Adicione 'ano-dropdown' como um Input
+        
+
+    ]
+)
+def update_graph_callback(selected_cidade, click_data, show_all_clicks, hide_matching_municipality, search_input, selected_ano):
+    # Garanta que o valor do campo de busca não seja None ou uma string vazia
+    if search_input is None or search_input == '':
         search_input = None
 
-    return callbacks.update_graph_callback(selected_cidade, click_data, show_all_clicks, df, G, pos, hide_matching_municipality, search_input)
+    # Redefina o estado ou valores que você deseja reiniciar
+    if show_all_clicks > 0:
+        selected_cidade = 'Todas'
+
+    # Filtrar o DataFrame pelo ano selecionado
+    if selected_ano and selected_ano != 'Todos':
+        df_filtered = df[df['ano'] == int(selected_ano)]
+    else:
+        df_filtered = df.copy()
+
+    return callbacks.update_graph_callback(selected_cidade, click_data, show_all_clicks, df_filtered, G, pos, hide_matching_municipality, search_input)
 
 if __name__ == '__main__':
     app.run_server(debug=True)

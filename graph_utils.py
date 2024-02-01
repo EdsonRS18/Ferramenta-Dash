@@ -5,84 +5,59 @@ from dash import dcc, html, Input, Output
 from data_utils import create_graph
 
 
-
 def create_node_text(node, node_df):
     node_type = 'mun_noti' if node in node_df['mun_noti'].values else 'mun_infe'
     node_name = node_df.loc[node_df[node_type] == node, 'nome_noti' if node_type == 'mun_noti' else 'nome_infe'].iloc[0]
     node_code = node_df.loc[node_df[node_type] == node, 'mun_noti' if node_type == 'mun_noti' else 'mun_infe'].iloc[0]
 
     if node_type == 'mun_noti':
-        filtered_node_df = node_df[(node_df['mun_noti'] == node) & (node_df['mun_infe'] == node)]
-        if not filtered_node_df.empty:
-            node_notifications = filtered_node_df.iloc [0]['notifications']
-        else:
-            node_notifications = 0  # ou qualquer outro valor padrão
+        # Filtra linhas onde mun_noti é igual a mun_infe e calcula a soma das notificações
+        node_notifications = node_df[(node_df['mun_noti'] == node) & (node_df['mun_infe'] == node)]['notifications'].sum()
 
-        node_total_notifications = node_df[node_df['mun_noti'] == node]['notifications'].sum()
-        return f"{node_name} ({node_code})<br>Notifications: {node_notifications}<br>Total Notifications: {node_total_notifications}"
+        # Soma total de notificações apenas para o nó específico
+        total_notifications = node_df[node_df[node_type] == node]['notifications'].sum()
+
+        return f"{node_name} ({node_code})<br>Notifications: {node_notifications}<br>Total Notifications: {total_notifications}"
     else:
+        # Quando o nó é do tipo 'mun_infe', mostra apenas as notificações desse nó
         node_notifications = node_df[node_df[node_type] == node]['notifications'].iloc[0]
         return f"{node_name} ({node_code})<br>Notifications: {node_notifications}"
+
+
 
 def determine_node_size(node, node_df, selected_city=None):
     node_type = 'mun_noti' if node in node_df['mun_noti'].values else 'mun_infe'
 
-    if selected_city and selected_city != 'Todas':
-        # Quando uma cidade específica é selecionada
-        if node_type == 'mun_noti':
-            node_notifications = node_df[node_df['mun_noti'] == node]['notifications'].sum()
-        else:
-            node_notifications = node_df[node_df['mun_infe'] == node]['notifications'].sum()
-    else:
-        # Quando nenhuma cidade ou 'Todas' são selecionadas
-        if node_type == 'mun_noti':
-            node_total_notifications = node_df[node_df['mun_noti'] == node]['notifications'].sum()
-        else:
-            node_notifications = node_df[node_df['mun_infe'] == node]['notifications'].sum()
-
-    base_size = 4
-
     if selected_city and selected_city != 'Todas' and node_type == 'mun_noti':
-        # Redimensionamento baseado em 'notifications' quando uma cidade específica é selecionada
+        # Quando um mun_noti está selecionado, redimensiona com base em 'notifications'
+        node_notifications = node_df[node_df['mun_noti'] == node]['notifications'].sum()
         if node_notifications < 100:
-                size = base_size
+            size = 10
         elif 101 <= node_notifications < 500:
-            size = base_size + 10
+            size = 20
         elif 501 <= node_notifications < 2000:
-            size = base_size + 15
+            size = 30
         else:
-            size = base_size + 200
+            size = 40
     else:
-        # Redimensionamento baseado em 'total_notifications' quando nenhuma cidade ou 'Todas' são selecionadas
-        if node_type == 'mun_noti':
-            if node_total_notifications < 5000:
-                size = base_size + 5
-            elif 5000 <= node_total_notifications < 10000:
-                size = base_size + 13
-            elif 10000 <= node_total_notifications < 16000:
-                size = base_size + 19
-            else:
-                size = base_size + 50
+        # Quando nenhum mun_noti está selecionado ou é tela inicial, redimensiona com base em 'total_notifications'
+        total_notifications = node_df[node_df['mun_noti'] == node]['notifications'].sum()
+        if total_notifications < 5000:
+            size = 10
+        elif 5000 <= total_notifications < 10000:
+            size = 20
+        elif 10000 <= total_notifications < 16000:
+            size = 30
         else:
-            if node_notifications < 100:
-                size = base_size
-            elif 101 <= node_notifications < 500:
-                size = base_size + 10
-            elif 501 <= node_notifications < 2000:
-                size = base_size + 15
-            else:
-                size = base_size + 20
+            size = 40
 
     return size
-
-
-
 
 def determine_node_color(node, node_df):
     node_type = 'mun_noti' if node in node_df['mun_noti'].values else 'mun_infe'
     return 'blue' if node_type == 'mun_noti' else 'green'
 
-def create_node_trace(G, node_df, selected_city=None, pos=None):
+def create_node_trace(G, node_df, selected_city=None, pos=None, hide_matching_municipality=False):
     node_text = []
     node_size = []
     node_color = []
@@ -93,6 +68,10 @@ def create_node_trace(G, node_df, selected_city=None, pos=None):
         visible_nodes.update(node_df['mun_noti'].values)
     else:
         visible_nodes.update(G.nodes())
+
+    if hide_matching_municipality:
+        # Se a opção hide_matching_municipality estiver ativada, remova o nó correspondente
+        visible_nodes.discard(node_df['mun_noti'].iloc[0])
 
     # Crie os traços para os nós visíveis
     latitudes = []
@@ -122,7 +101,7 @@ def create_node_trace(G, node_df, selected_city=None, pos=None):
         marker=dict(size=node_size, color=node_color),
         text=node_text,
         hoverinfo='text',
-        customdata=[node_code for node_code in visible_nodes]  # Adiciona dados personalizados para capturar o código do nó
+        customdata=[node_code for node_code in visible_nodes]
     )
 
 def create_edge_trace(G, edge_df, pos):
@@ -135,7 +114,7 @@ def create_edge_trace(G, edge_df, pos):
         lat=[],
         lon=[],
         mode='lines',
-        line=dict(width=1, color='red'),
+        line=dict(width=1, color='LightPink'),
         hoverinfo='text',
         text=edge_text,
     )
@@ -149,21 +128,21 @@ def create_edge_trace(G, edge_df, pos):
 
     return edge_trace
 
-def update_graph(selected_cidade, data, G, pos):
-    print(f"Updating graph for selected_cidade: {selected_cidade}")
+def update_graph(selected_city, data, G, pos, hide_matching_municipality=False):
+    print(f"Updating graph for selected_city: {selected_city}")
 
-    if selected_cidade == 'Todas':
+    if selected_city == 'Todas':
         filtered_df = data
         include_edges = False
     else:
-        filtered_df = data[data['mun_noti'] == selected_cidade]
+        filtered_df = data[data['mun_noti'] == selected_city]
         include_edges = True
     
     G_selected = create_graph(filtered_df)
     pos_selected = nx.get_node_attributes(G_selected, 'pos')
 
-    # Passando a variável pos_selected para a função create_node_trace
-    node_trace_selected = create_node_trace(G_selected, filtered_df, selected_cidade, pos_selected)
+    # Passando a variável pos_selected e hide_matching_municipality para a função create_node_trace
+    node_trace_selected = create_node_trace(G_selected, filtered_df, selected_city, pos_selected, hide_matching_municipality)
     
     if include_edges:
         edge_trace_selected = create_edge_trace(G_selected, filtered_df, pos_selected)
@@ -171,7 +150,7 @@ def update_graph(selected_cidade, data, G, pos):
     else:
         traces = [node_trace_selected]
 
-    if selected_cidade != 'Todas':
+    if selected_city != 'Todas':
         # Ajuste para selecionar o nome correto do município
         selected_city_name = filtered_df['nome_noti'].iloc[0]
         # Adicionando o número de notificações ao título
@@ -194,3 +173,4 @@ def update_graph(selected_cidade, data, G, pos):
             'width': 700,
         }
     }
+

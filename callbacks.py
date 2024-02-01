@@ -17,7 +17,7 @@ def update_graph_callback(selected_city, click_data, show_all_clicks, df, G, pos
     if hide_matching_municipality and 'hide' in hide_matching_municipality:
         df_filtered = df_filtered[df_filtered['mun_noti'] != df_filtered['mun_infe']]
 
-    grafo_direcional = update_graph(selected_city, df_filtered, G, pos)
+    grafo_direcional = update_graph(selected_city, df_filtered, G, pos,hide_matching_municipality)
 
     if selected_city == 'Todas':
         grafico_colunas = {
@@ -67,3 +67,4 @@ def update_graph_callback(selected_city, click_data, show_all_clicks, df, G, pos
         }
 
     return grafo_direcional, grafico_colunas, selected_city, show_all_clicks
+
