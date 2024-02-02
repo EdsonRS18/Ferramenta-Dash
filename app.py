@@ -6,8 +6,8 @@ from data_utils import load_data, create_graph
 import networkx as nx
 import dash_bootstrap_components as dbc 
 # Importação de funções personalizadas
-import malaria_layout 
-import info_layout
+from malaria_layout import create_malaria_layout
+from info_layout import create_info_layout
 import layout
 import callbacks
 
@@ -23,39 +23,6 @@ G = create_graph(df)
 pos = nx.get_node_attributes(G, 'pos')
 node_color = ['blue' if node in df['mun_noti'].values else 'green' for node in G.nodes()]
 
-# Modificando o layout da página principal
-layout_principal = html.Div([
-    # Adicionando botões de navegação
-    html.Div([
-        dcc.Link(dbc.Button("Ir para pagina malaria", color="primary"), href="/pagina_malaria"),
-        dcc.Link(dbc.Button("Ir para Outra Página", color="primary"), href="/outra_pagina")
-    ], style={'margin-top': '20px'}),  # Adicionei a vírgula aqui
-    
-    layout.create_layout(df)  # Restante do layout principal
-])
-
-# Modificando o layout da página de malária
-pagina_malaria = html.Div([
-    malaria_layout.create_malaria_layout(df),  # Página sobre malária
-
-    # Adicionando botões de navegação
-    html.Div([
-        dcc.Link(dbc.Button("Ir para Painel", color="primary"), href="/"),
-        dcc.Link(dbc.Button("Ir para Outra Página", color="primary"), href="/outra_pagina")
-    ], style={'margin-top': '20px'})
-])
-
-# Modificando o layout da outra página
-outra_pagina = html.Div([
-    info_layout.create_info_layout(df),  # Página sobre malária
-
-    # Adicionando botões de navegação
-    html.Div([
-        dcc.Link(dbc.Button("Ir para Painel", color="primary"), href="/"),
-        dcc.Link(dbc.Button("Ir para Malária", color="primary"), href="/pagina_malaria")
-    ], style={'margin-top': '20px'})
-])
-
 # Layout completo da aplicação
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
@@ -68,14 +35,13 @@ app.layout = html.Div([
 )
 def display_page(pathname):
     if pathname == '/':
-        return layout_principal
+        return layout.create_layout(df)
     elif pathname == '/pagina_malaria':
-        return pagina_malaria
+        return create_malaria_layout(df)
     elif pathname == '/outra_pagina':
-        return outra_pagina
+        return create_info_layout(df)
     else:
         return '404 - Página não encontrada'
-
 @app.callback(
     [
         Output('grafo-direcional', 'figure'),

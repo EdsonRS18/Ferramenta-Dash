@@ -1,5 +1,5 @@
 import plotly.graph_objects as go
-from graph_utils import update_graph
+from update_graph import update_graph
 
 def update_graph_callback(selected_city, click_data, show_all_clicks, df, G, pos, hide_matching_municipality=None, search_input=None):
     print(f"Selected city: {selected_city}")

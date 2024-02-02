@@ -1,8 +1,4 @@
-# Importação de bibliotecas necessárias
 import plotly.graph_objects as go
-import networkx as nx
-from dash import dcc, html, Input, Output
-from data_utils import create_graph
 
 
 def create_node_text(node, node_df):
@@ -103,74 +99,3 @@ def create_node_trace(G, node_df, selected_city=None, pos=None, hide_matching_mu
         hoverinfo='text',
         customdata=[node_code for node_code in visible_nodes]
     )
-
-def create_edge_trace(G, edge_df, pos):
-    edge_text = []
-
-    for _, row in edge_df.iterrows():
-        edge_text.append(f"Origem: {row['mun_noti']} <br> Destino: {row['mun_infe']}")
-
-    edge_trace = go.Scattermapbox(
-        lat=[],
-        lon=[],
-        mode='lines',
-        line=dict(width=1, color='LightPink'),
-        hoverinfo='text',
-        text=edge_text,
-    )
-
-    for _, row in edge_df.iterrows():
-        node_noti, node_infe = row['mun_noti'], row['mun_infe']
-        x0, y0 = pos[node_noti]
-        x1, y1 = pos[node_infe]
-        edge_trace['lat'] += (x0, x1, None)
-        edge_trace['lon'] += (y0, y1, None)
-
-    return edge_trace
-
-def update_graph(selected_city, data, G, pos, hide_matching_municipality=False):
-    print(f"Updating graph for selected_city: {selected_city}")
-
-    if selected_city == 'Todas':
-        filtered_df = data
-        include_edges = False
-    else:
-        filtered_df = data[data['mun_noti'] == selected_city]
-        include_edges = True
-    
-    G_selected = create_graph(filtered_df)
-    pos_selected = nx.get_node_attributes(G_selected, 'pos')
-
-    # Passando a variável pos_selected e hide_matching_municipality para a função create_node_trace
-    node_trace_selected = create_node_trace(G_selected, filtered_df, selected_city, pos_selected, hide_matching_municipality)
-    
-    if include_edges:
-        edge_trace_selected = create_edge_trace(G_selected, filtered_df, pos_selected)
-        traces = [edge_trace_selected, node_trace_selected]
-    else:
-        traces = [node_trace_selected]
-
-    if selected_city != 'Todas':
-        # Ajuste para selecionar o nome correto do município
-        selected_city_name = filtered_df['nome_noti'].iloc[0]
-        # Adicionando o número de notificações ao título
-        total_notifications = filtered_df['notifications'].sum()
-        title = f'Município Selecionado: {selected_city_name}'
-    else:
-        selected_city_name = "Todas as cidades"
-        title = f'Município Selecionado: {selected_city_name}'
-
-    return {
-        'data': traces,
-        'layout': {
-            'mapbox': {
-                'center': dict(lat=filtered_df['latitude_noti'].mean(), lon=filtered_df['longitude_noti'].mean()),
-                'zoom': 3.4,
-                'style': "open-street-map",
-            },
-            'title': title,
-            'height': 700,
-            'width': 700,
-        }
-    }
-

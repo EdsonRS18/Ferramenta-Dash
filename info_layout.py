@@ -1,22 +1,24 @@
+# info_layout.py
 from dash import html
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 
 def create_info_layout(df):
-    # Aqui você pode adicionar os componentes para exibir informações sobre a malária
-    malaria_content = html.Div([
+    # Aqui você pode adicionar os componentes para exibir informações sobre o projeto
+    info_content = html.Div([
         html.H2('Informações'),
         html.P('Aqui você pode adicionar informações sobre o projeto.'),
-        # Adicione mais componentes conforme necessário para exibir os dados ou gráficos sobre a malária
+        # Adicione mais componentes conforme necessário para exibir os dados ou gráficos
     ])
 
-    # Montagem do layout final para a seção de malária
-    malaria_layout = html.Div(
+    # Montagem do layout final para a seção de informações
+    info_layout = html.Div(
         dbc.Card(
             dbc.CardBody([
                 html.Div([
                     html.Div([
-                        malaria_content,
-                        # Adicione mais conteúdo relacionado à malária conforme necessário...
+                        info_content,
+                        # Adicione mais conteúdo relacionado às informações conforme necessário...
                     ])
                 ], style={'margin-bottom': '20px'}),
             ]),
@@ -29,4 +31,10 @@ def create_info_layout(df):
         )
     )
 
-    return malaria_layout
+    return html.Div([
+        info_layout,
+        html.Div([
+            dcc.Link(dbc.Button("Ir para Painel", color="primary"), href="/"),
+            dcc.Link(dbc.Button("Ir para Malária", color="primary"), href="/pagina_malaria")
+        ], style={'margin-top': '20px'})
+    ])

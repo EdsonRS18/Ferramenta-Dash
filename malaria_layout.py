@@ -1,4 +1,5 @@
-from dash import html
+# malaria_layout.py
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 
 def create_malaria_layout(df):
@@ -29,4 +30,10 @@ def create_malaria_layout(df):
         )
     )
 
-    return malaria_layout
+    return html.Div([
+        malaria_layout,
+        html.Div([
+            dcc.Link(dbc.Button("Ir para Painel", color="primary"), href="/"),
+            dcc.Link(dbc.Button("Ir para Outra Página", color="primary"), href="/outra_pagina")
+        ], style={'margin-top': '20px'})
+    ])
