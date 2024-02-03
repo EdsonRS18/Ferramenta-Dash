@@ -1,5 +1,6 @@
 # Importação de bibliotecas necessárias
-from dash import Dash, html, dcc, Input, Output
+from dash import Dash, html, dcc, Input, Output, exceptions
+from dash import dcc
 from dash.dependencies import Input, Output
 import pandas as pd
 from data_utils import load_data, create_graph
@@ -9,6 +10,8 @@ import dash_bootstrap_components as dbc
 from malaria_layout import create_malaria_layout
 from info_layout import create_info_layout
 import layout
+from dash.exceptions import PreventUpdate
+
 import callbacks
 
 external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css']
@@ -23,10 +26,9 @@ G = create_graph(df)
 pos = nx.get_node_attributes(G, 'pos')
 node_color = ['blue' if node in df['mun_noti'].values else 'green' for node in G.nodes()]
 
-# Layout completo da aplicação
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
-    html.Div(id='page-content')
+    html.Div(id='page-content'),
 ])
 
 @app.callback(
@@ -42,40 +44,47 @@ def display_page(pathname):
         return create_info_layout(df)
     else:
         return '404 - Página não encontrada'
+    
+
+
+@app.callback(Output('url', 'pathname'), [Input('update-button', 'n_clicks')])
+def refresh_page(n_clicks):
+    if n_clicks is not None and n_clicks > 0:
+        return '/'
+    raise exceptions.PreventUpdate
+
+
 @app.callback(
     [
         Output('grafo-direcional', 'figure'),
         Output('grafico-colunas', 'figure'),
         Output('cidade-dropdown', 'value'),
-        Output('show-all-button', 'n_clicks')
     ],
     [
         Input('cidade-dropdown', 'value'),
         Input('grafo-direcional', 'clickData'),
-        Input('show-all-button', 'n_clicks'),
+        # Remova a entrada correspondente ao 'show-all-button'
         Input('hide-matching-municipality', 'value'),
         Input('search-input', 'value'),
-        Input('ano-dropdown', 'value')  # Adicione 'ano-dropdown' como um Input
-        
-
+        Input('ano-dropdown', 'value'),
+        Input('update-button', 'n_clicks'),  
     ]
 )
-def update_graph_callback(selected_cidade, click_data, show_all_clicks, hide_matching_municipality, search_input, selected_ano):
-    # Garanta que o valor do campo de busca não seja None ou uma string vazia
-    if search_input is None or search_input == '':
-        search_input = None
-
-    # Redefina o estado ou valores que você deseja reiniciar
-    if show_all_clicks > 0:
-        selected_cidade = 'Todas'
-
-    # Filtrar o DataFrame pelo ano selecionado
-    if selected_ano and selected_ano != 'Todos':
-        df_filtered = df[df['ano'] == int(selected_ano)]
+def update_graph_callback(selected_cidade, click_data, hide_matching_municipality, search_input, selected_ano, update_clicks):
+    if update_clicks is not None and update_clicks > 0:
+        # Lógica de atualização aqui
+        callbacks.update_graph_callback('Todas', None, df, G, pos, hide_matching_municipality, search_input)
     else:
-        df_filtered = df.copy()
+        if search_input is None or search_input == '':
+            search_input = None
 
-    return callbacks.update_graph_callback(selected_cidade, click_data, show_all_clicks, df_filtered, G, pos, hide_matching_municipality, search_input)
+        if selected_ano and selected_ano != 'Todos':
+            df_filtered = df[df['ano'] == int(selected_ano)]
+        else:
+            df_filtered = df.copy()
+
+        return callbacks.update_graph_callback(selected_cidade, click_data, df_filtered, G, pos, hide_matching_municipality, search_input)
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

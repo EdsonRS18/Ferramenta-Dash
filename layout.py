@@ -1,8 +1,3 @@
-# layout.py
-from dash import html, dcc
-import dash_bootstrap_components as dbc
-import pandas as pd
-# layout.py
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 import pandas as pd
@@ -26,21 +21,19 @@ def create_layout(df):
         value='Todas',
         style={'width': '100%'}  # Aumentando a largura do dropdown
     )
+    update_button = dbc.Button(
+    'Mostrar todas as cidades',
+    id='update-button',
+    n_clicks=0,
+    color='primary',
+    style={'margin-top': '10px'}
+)
 
     search_input = dcc.Input(
         id='search-input',
         type='text',
         placeholder='Digite o nome do município...',
         style={'width': '100%'}  # Aumentando a largura da caixa de texto
-    )
-
-    # Adicionando botão "Mostrar Todas as Cidades"
-    show_all_button = dbc.Button(
-        'Mostrar Todas as Cidades',
-        id='show-all-button',
-        n_clicks=0,
-        color='success',
-        style={'margin-top': '10px'}  # Ajustando a margem superior
     )
 
     hide_matching_checkbox = dcc.Checklist(
@@ -53,12 +46,12 @@ def create_layout(df):
     grafo_direcional = dcc.Graph(
         id='grafo-direcional',
         config={'scrollZoom': False, 'displayModeBar': True},
-        style={'height': '400px'}
+        #style={'height': '400px'}
     )
 
     grafico_colunas = dcc.Graph(
         id='grafico-colunas',
-        style={'height': '400px'}
+       # style={'height': '400px'}
     )
 
     # Criando o Dropdown de Ano
@@ -77,10 +70,15 @@ def create_layout(df):
     )
 
     # Layout dos gráficos lado a lado
-    graficos_lado_a_lado = dbc.Row([
-        dbc.Col(grafo_direcional, width=6),
-        dbc.Col(grafico_colunas, width=6),
-    ], key='graficos_lado_a_lado_key', style={'margin-top': '20px'})  # Ajustando a margem superior
+    graficos_lado_a_lado = html.Div([
+        html.Div([
+            grafo_direcional
+        ], style={'width': '50%', 'display': 'inline-block'}),
+
+        html.Div([
+            grafico_colunas
+        ], style={'width': '50%', 'display': 'inline-block'}),
+    ], key='graficos_lado_a_lado_key')
 
     # Montagem do layout final
     layout = html.Div([
@@ -90,7 +88,6 @@ def create_layout(df):
             dbc.Col([
                 html.Label('Selecione a cidade:'),
                 cidade_dropdown,
-                show_all_button,
             ], width=4),
 
             dbc.Col([
@@ -103,9 +100,13 @@ def create_layout(df):
                 html.Label('Selecione o ano:'),
                 ano_dropdown,
             ], width=4),
+            dbc.Col([
+            update_button,  # Adicione o novo botão de atualização
+        ], width=4),
         ], className='filter-section'),
 
         graficos_lado_a_lado
-    ], className='main-layout', style={'height': '800px', 'padding': '20px', 'background-color': '#f8f9fa', 'border-radius': '10px'})
+        
+    ], style={'height': '800px'})
 
     return layout

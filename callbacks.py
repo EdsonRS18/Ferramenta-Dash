@@ -1,14 +1,11 @@
 import plotly.graph_objects as go
 from update_graph import update_graph
 
-def update_graph_callback(selected_city, click_data, show_all_clicks, df, G, pos, hide_matching_municipality=None, search_input=None):
+def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_municipality=None, search_input=None):
     print(f"Selected city: {selected_city}")
     print(f"Search input: {search_input}")
 
-    if show_all_clicks and show_all_clicks > 0:
-        selected_city = 'Todas'
-        show_all_clicks = 0
-    elif click_data and 'points' in click_data:
+    if click_data and 'points' in click_data:
         clicked_node_code = click_data['points'][0]['customdata']
         selected_city = clicked_node_code
 
@@ -17,7 +14,7 @@ def update_graph_callback(selected_city, click_data, show_all_clicks, df, G, pos
     if hide_matching_municipality and 'hide' in hide_matching_municipality:
         df_filtered = df_filtered[df_filtered['mun_noti'] != df_filtered['mun_infe']]
 
-    grafo_direcional = update_graph(selected_city, df_filtered, G, pos,hide_matching_municipality)
+    grafo_direcional = update_graph(selected_city, df_filtered, G, pos, hide_matching_municipality)
 
     if selected_city == 'Todas':
         grafico_colunas = {
@@ -66,5 +63,4 @@ def update_graph_callback(selected_city, click_data, show_all_clicks, df, G, pos
             }
         }
 
-    return grafo_direcional, grafico_colunas, selected_city, show_all_clicks
-
+    return grafo_direcional, grafico_colunas, selected_city
