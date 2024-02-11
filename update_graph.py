@@ -1,7 +1,6 @@
 # Importação de bibliotecas necessárias
 import plotly.graph_objects as go
 import networkx as nx
-from dash import dcc, html, Input, Output
 from data_utils import create_graph
 from nodes import create_node_trace
 from aresta import create_edge_trace
@@ -15,13 +14,13 @@ def update_graph(selected_city, data, G, pos, hide_matching_municipality=False):
     else:
         filtered_df = data[data['mun_noti'] == selected_city]
         include_edges = True
-    
+
     G_selected = create_graph(filtered_df)
     pos_selected = nx.get_node_attributes(G_selected, 'pos')
 
     # Passando a variável pos_selected e hide_matching_municipality para a função create_node_trace
     node_trace_selected = create_node_trace(G_selected, filtered_df, selected_city, pos_selected, hide_matching_municipality)
-    
+
     if include_edges:
         edge_trace_selected = create_edge_trace(G_selected, filtered_df, pos_selected)
         traces = [edge_trace_selected, node_trace_selected]
@@ -29,9 +28,7 @@ def update_graph(selected_city, data, G, pos, hide_matching_municipality=False):
         traces = [node_trace_selected]
 
     if selected_city != 'Todas':
-        # Ajuste para selecionar o nome correto do município
         selected_city_name = filtered_df['nome_noti'].iloc[0]
-        # Adicionando o número de notificações ao título
         total_notifications = filtered_df['notifications'].sum()
         title = f'Município Selecionado: {selected_city_name}'
     else:
@@ -51,3 +48,6 @@ def update_graph(selected_city, data, G, pos, hide_matching_municipality=False):
             'width': 700,
         }
     }
+
+
+

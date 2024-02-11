@@ -1,8 +1,11 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-import pandas as pd
 
+
+from callbacks import create_line_chart
 def create_layout(df):
+
+    
 
     # Adicionando botões de navegação acima do dropdown
     buttons_navigation = dbc.Row([
@@ -28,13 +31,7 @@ def create_layout(df):
     color='primary',
     style={'margin-top': '10px'}
 )
-
-    search_input = dcc.Input(
-        id='search-input',
-        type='text',
-        placeholder='Digite o nome do município...',
-        style={'width': '100%'}  # Aumentando a largura da caixa de texto
-    )
+    
 
     hide_matching_checkbox = dcc.Checklist(
         id='hide-matching-municipality',
@@ -54,6 +51,7 @@ def create_layout(df):
        # style={'height': '400px'}
     )
 
+
     # Criando o Dropdown de Ano
     anos_unicos = sorted(df['ano'].dropna().unique())
     options_ano_dropdown = [
@@ -61,25 +59,38 @@ def create_layout(df):
         * [{'label': str(ano), 'value': str(ano)} for ano in anos_unicos]
     ]
 
-    ano_dropdown = dcc.Dropdown(
-        id='ano-dropdown',
-        options=options_ano_dropdown,
-        value='Todos',  # Inicia com a opção "Todos os anos" selecionada
-        clearable=False,
-        style={'width': '100%'}  # Aumentando a largura do dropdown
+        # Substitua o código do dropdown de ano pelo RangeSlider
+    ano_range_slider = dcc.RangeSlider(
+        id='ano-range-slider',
+        min=min(anos_unicos),
+        max=max(anos_unicos),
+        step=1,
+        marks={str(ano): str(ano) for ano in anos_unicos},
+        value=[min(anos_unicos), max(anos_unicos)],  # Defina o intervalo inicial
     )
 
     # Layout dos gráficos lado a lado
     graficos_lado_a_lado = html.Div([
         html.Div([
-            grafo_direcional
-        ], style={'width': '50%', 'display': 'inline-block'}),
+            dcc.Loading(
+                id="loading-graficos",
+                type="circle",
+                children=[
+                    html.Div([
+                        grafo_direcional,
+                        grafico_colunas,
+                    ], style={'width': '100%', 'display': 'flex'}),
+                ],
+            ),
+        ], key='graficos_lado_a_lado_key'),
+    ], key='graficos_lado_a_lado_loading_key')
 
-        html.Div([
-            grafico_colunas
-        ], style={'width': '50%', 'display': 'inline-block'}),
-    ], key='graficos_lado_a_lado_key')
-
+    # Bloco separado para o gráfico de linha
+    grafico_linha = dbc.Row([
+    dbc.Col([
+        create_line_chart(df)
+    ], width=12),
+    ])
     # Montagem do layout final
     layout = html.Div([
         buttons_navigation,
@@ -91,21 +102,29 @@ def create_layout(df):
             ], width=4),
 
             dbc.Col([
-                html.Label('Filtro por nome de município:'),
-                search_input,
+                html.Label(''),
                 hide_matching_checkbox,
             ], width=4),
 
+            # Substitua a seção do layout onde o dropdown de ano é adicionado pelo RangeSlider
             dbc.Col([
-                html.Label('Selecione o ano:'),
-                ano_dropdown,
-            ], width=4),
+            html.Label('Selecione o intervalo de anos:'),
+            ano_range_slider,
+            # Adicione a linha informativa para exibir o intervalo selecionado por extenso
+            html.Div(id='intervalo-selecionado', style={'margin-top': '10px'}),
+    ], width=4),
             dbc.Col([
             update_button,  # Adicione o novo botão de atualização
         ], width=4),
         ], className='filter-section'),
 
-        graficos_lado_a_lado
+        # Adicione os blocos de gráfico ao layout
+     # Adicione o indicador de carregamento e os blocos de gráfico ao layout
+    html.Div([
+        graficos_lado_a_lado,
+        grafico_linha,
+    ], style={'width': '100%'}),
+
         
     ], style={'height': '800px'})
 

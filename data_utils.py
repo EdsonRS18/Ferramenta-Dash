@@ -1,6 +1,5 @@
 # Importação de bibliotecas necessárias
 import pandas as pd
-from dash import dcc, html, Input, Output
 import networkx as nx
 
 def load_data(file_path, nrows=1500):

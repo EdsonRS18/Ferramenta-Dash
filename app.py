@@ -2,24 +2,21 @@
 from dash import Dash, html, dcc, Input, Output, exceptions
 from dash import dcc
 from dash.dependencies import Input, Output
-import pandas as pd
 from data_utils import load_data, create_graph
 import networkx as nx
-import dash_bootstrap_components as dbc 
 # Importação de funções personalizadas
 from malaria_layout import create_malaria_layout
 from info_layout import create_info_layout
 import layout
-from dash.exceptions import PreventUpdate
-
+from dash import dcc
 import callbacks
-
+import plotly.express as px
 external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css']
 
 app = Dash(__name__, external_stylesheets=external_stylesheets, suppress_callback_exceptions=True)
 
 # Carregar os dados
-df = load_data('Definitivo.csv', nrows=15000)
+df = load_data('Definitivo.csv', nrows=40000)
 df['notificacoes_proprias'] = df.groupby('mun_noti')['notifications'].transform('sum')
 df['notificacoes_total'] = df.groupby('mun_noti')['notifications'].transform('sum')
 G = create_graph(df)
@@ -59,31 +56,61 @@ def refresh_page(n_clicks):
         Output('grafo-direcional', 'figure'),
         Output('grafico-colunas', 'figure'),
         Output('cidade-dropdown', 'value'),
+        
     ],
     [
         Input('cidade-dropdown', 'value'),
         Input('grafo-direcional', 'clickData'),
-        # Remova a entrada correspondente ao 'show-all-button'
         Input('hide-matching-municipality', 'value'),
-        Input('search-input', 'value'),
-        Input('ano-dropdown', 'value'),
+        Input('ano-range-slider', 'value'),
         Input('update-button', 'n_clicks'),  
     ]
 )
-def update_graph_callback(selected_cidade, click_data, hide_matching_municipality, search_input, selected_ano, update_clicks):
+def update_graph_callback(selected_cidade, click_data, hide_matching_municipality, selected_ano, update_clicks):
     if update_clicks is not None and update_clicks > 0:
         # Lógica de atualização aqui
-        callbacks.update_graph_callback('Todas', None, df, G, pos, hide_matching_municipality, search_input)
+        callbacks.update_graph_callback('Todas', None, df, G, pos, hide_matching_municipality)
     else:
-        if search_input is None or search_input == '':
-            search_input = None
-
-        if selected_ano and selected_ano != 'Todos':
-            df_filtered = df[df['ano'] == int(selected_ano)]
+        if selected_ano and 'Todos' not in selected_ano:
+            df_filtered = df[df['ano'].between(int(selected_ano[0]), int(selected_ano[1]))]
         else:
             df_filtered = df.copy()
 
-        return callbacks.update_graph_callback(selected_cidade, click_data, df_filtered, G, pos, hide_matching_municipality, search_input)
+
+
+        return callbacks.update_graph_callback(selected_cidade, click_data, df_filtered, G, pos, hide_matching_municipality)
+
+@app.callback(
+    Output('line-chart', 'figure'),
+    [Input('cidade-dropdown', 'value')]
+)
+def update_line_chart(selected_cidade):
+    if selected_cidade == 'Todas':
+        df_aggregated = df.groupby('ano')['notifications'].sum().reset_index()
+    else:
+        df_aggregated = df[df['mun_noti'] == selected_cidade].groupby('ano')['notifications'].sum().reset_index()
+
+    line_chart = px.line(df_aggregated, x='ano', y='notifications', markers=True, title=f'Evolução da Malária em {selected_cidade}')
+    
+    line_chart.update_layout(
+        xaxis_title='Ano',
+        yaxis_title='Número de Notificações de Malária',
+        height=400,
+    )
+
+    return line_chart
+
+@app.callback(
+    Output('intervalo-selecionado', 'children'),
+    [Input('ano-range-slider', 'value')]
+)
+def update_intervalo_selecionado(intervalo):
+    if intervalo is None or len(intervalo) != 2:
+        return 'Intervalo não selecionado'
+
+    inicio, fim = intervalo
+    return f'Intervalo Selecionado: {inicio} a {fim}'
+
 
 
 if __name__ == '__main__':
