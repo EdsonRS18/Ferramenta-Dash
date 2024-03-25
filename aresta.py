@@ -4,8 +4,8 @@ import plotly.graph_objects as go
 def create_edge_trace(G, edge_df, pos):
     edge_text = []
 
-    for _, row in edge_df.iterrows():
-        edge_text.append(f"Origem: {row['mun_noti']} <br> Destino: {row['mun_infe']}")
+    #for _, row in edge_df.iterrows():
+        #edge_text.append(f"Origem: {row['mun_noti']} <br> Destino: {row['mun_infe']}")
 
     edge_trace = go.Scattermapbox(
         lat=[],

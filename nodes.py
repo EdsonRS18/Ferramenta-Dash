@@ -1,23 +1,34 @@
 import plotly.graph_objects as go
 
-
 def create_node_text(node, node_df):
+    # Define o tipo de nó com base na presença do valor em 'mun_noti'
     node_type = 'mun_noti' if node in node_df['mun_noti'].values else 'mun_infe'
-    node_name = node_df.loc[node_df[node_type] == node, 'nome_noti' if node_type == 'mun_noti' else 'nome_infe'].iloc[0]
-    node_code = node_df.loc[node_df[node_type] == node, 'mun_noti' if node_type == 'mun_noti' else 'mun_infe'].iloc[0]
+    
+    # Colunas para obter o nome e código do nó
+    node_name_col = 'nome_noti' if node_type == 'mun_noti' else 'nome_infe'
+    node_code_col = 'mun_noti' if node_type == 'mun_noti' else 'mun_infe'
 
     if node_type == 'mun_noti':
-        # Filtra linhas onde mun_noti é igual a mun_infe e calcula a soma das notificações
+        # Calcula as notificações apenas quando mun_noti é igual a mun_infe
         node_notifications = node_df[(node_df['mun_noti'] == node) & (node_df['mun_infe'] == node)]['notifications'].sum()
-
-        # Soma total de notificações apenas para o nó específico
-        total_notifications = node_df[node_df[node_type] == node]['notifications'].sum()
-
-        return f"{node_name} ({node_code})<br>Notifications: {node_notifications}<br>Total Notifications: {total_notifications}"
     else:
-        # Quando o nó é do tipo 'mun_infe', mostra apenas as notificações desse nó
-        node_notifications = node_df[node_df[node_type] == node]['notifications'].iloc[0]
+        # Mantém a lógica original para mun_infe
+        node_notifications = node_df[node_df[node_type] == node]['notifications'].sum()
+
+        # Obtém o nome e código do município
+        node_name = node_df.loc[node_df[node_type] == node, node_name_col].iloc[0]
+        node_code = node_df.loc[node_df[node_type] == node, node_code_col].iloc[0]
+
+        # Retorna o nome, código e número de notificações se o tipo de nó for 'mun_infe'
         return f"{node_name} ({node_code})<br>Notifications: {node_notifications}"
+
+    # Calcula o total de notificações para o município
+    total_notifications = node_df[node_df[node_type] == node]['notifications'].sum()
+
+    node_name = node_df.loc[node_df[node_type] == node, node_name_col].iloc[0]
+    node_code = node_df.loc[node_df[node_type] == node, node_code_col].iloc[0]
+
+    return f"{node_name} ({node_code})<br>Notifications: {node_notifications}<br>Total Notifications: {total_notifications}"
 
 
 
@@ -29,9 +40,9 @@ def determine_node_size(node, node_df, selected_city=None):
         node_notifications = node_df[node_df['mun_noti'] == node]['notifications'].sum()
         if node_notifications < 100:
             size = 10
-        elif 101 <= node_notifications < 500:
+        elif 100 <= node_notifications < 500:
             size = 20
-        elif 501 <= node_notifications < 2000:
+        elif 500 <= node_notifications < 2000:
             size = 30
         else:
             size = 40

@@ -16,12 +16,34 @@ def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_m
     grafo_direcional = update_graph(selected_city, df_filtered, G, pos, hide_matching_municipality)
 
     if selected_city == 'Todas':
+        # Mostrar os top 10 municípios de infecção
+        dados_grafico_colunas = df_filtered.groupby('mun_infe').agg(
+    {'notifications': 'sum', 'nome_infe': 'first'}
+    ).reset_index().sort_values(by='notifications', ascending=True).tail(10)
+
+        trace_mun_infe = go.Bar(
+            y=dados_grafico_colunas['nome_infe'],
+            x=dados_grafico_colunas['notifications'],
+            hoverinfo='x',
+            orientation='h',
+            name='mun_infe',
+        )
+
         grafico_colunas = {
-            'data': [],
+            'data': [trace_mun_infe],
             'layout': {
-                'title': 'Notificações por Município de Infecção',
+                'title': f'TOP 10 Municípios de Infecção{selected_years}',
                 'height': 700,
-                'width': 700,
+                'width': 600,
+                'yaxis': {
+                    'tickmode': 'linear',
+                    'tickvals': list(range(10)),
+                    'ticktext': dados_grafico_colunas['nome_infe'],
+                    'dtick': 1,
+                    'automargin': True,
+                },
+                'xaxis': {'title': 'Número de Notificações'},
+                'margin': {'l': 150},
             }
         }
     else:
@@ -37,7 +59,6 @@ def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_m
         total_notifications_mun_noti = filtered_df['notificacoes_total'].iloc[0] if not filtered_df.empty else 0
         selected_city_name = filtered_df['nome_noti'].iloc[0] if not filtered_df.empty else "Selected Municipality"
 
-        title_suffix = f' - Anos: {", ".join(map(str, selected_years))}' if selected_years is not None else ''
 
         trace_mun_infe = go.Bar(
             y=dados_grafico_colunas['nome_infe'],
@@ -51,9 +72,9 @@ def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_m
         grafico_colunas = {
         'data': [trace_mun_infe],
         'layout': {
-            'title': f'TOP 10 Municípios de Infecção (Relacionado a {selected_city_name}){title_suffix}',
+            'title': f'TOP 10 Municípios de Infecção (Relacionado a {selected_city_name}){selected_years}',
             'height': 700,
-            'width': 700,
+            'width': 600,
             'yaxis': {
                 'tickmode': 'linear',
                 'tickvals': dados_grafico_colunas['nome_infe'],
@@ -83,7 +104,7 @@ def create_line_chart(df, selected_year=None):
     else:
         df_aggregated['percentagem'] = (df_aggregated['notifications'] / df_aggregated['notifications'].sum()) * 100
 
-    line_chart = px.line(df_aggregated, x='ano', y='percentagem', markers=True, title='Evolução da Porcentagem de Notificações de Malária ao Longo dos Anos')
+    line_chart = px.line(df_aggregated, x='ano', y='percentagem', markers=True, title='Evolução de Notificações de Malária ao Longo dos Anos')
 
     line_chart.update_layout(
         xaxis_title='Ano',

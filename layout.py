@@ -35,7 +35,7 @@ def create_layout(df):
 
     hide_matching_checkbox = dcc.Checklist(
         id='hide-matching-municipality',
-        options=[{'label': 'Ocultar notificações do município nele mesmo', 'value': 'hide'}],
+        options=[{'label': 'Ocultar infecções ocorridas no próprio município', 'value': 'hide'}],
         value=[]
     )
 
@@ -59,15 +59,19 @@ def create_layout(df):
         * [{'label': str(ano), 'value': str(ano)} for ano in anos_unicos]
     ]
 
-        # Substitua o código do dropdown de ano pelo RangeSlider
+     # Gere uma lista de anos pares
+    anos_pares = [ano for ano in anos_unicos if ano % 2 == 0]
+
+    # Configure o RangeSlider para exibir todos os anos, mas visualmente de dois em dois
     ano_range_slider = dcc.RangeSlider(
         id='ano-range-slider',
         min=min(anos_unicos),
         max=max(anos_unicos),
-        step=1,
-        marks={str(ano): str(ano) for ano in anos_unicos},
+        step=1,  # Mantenha o passo como 1 para incluir todos os anos
+        marks={str(ano): str(ano) if ano % 2 == 0 else '' for ano in anos_unicos},
         value=[min(anos_unicos), max(anos_unicos)],  # Defina o intervalo inicial
     )
+
 
     # Layout dos gráficos lado a lado
     graficos_lado_a_lado = html.Div([
@@ -88,12 +92,12 @@ def create_layout(df):
     # Bloco separado para o gráfico de linha
     grafico_linha = dbc.Row([
     dbc.Col([
-        create_line_chart(df)
+        dcc.Graph(id='line-chart')  # Certifique-se de usar o mesmo ID definido no callback
     ], width=12),
-    ])
+])
     # Montagem do layout final
     layout = html.Div([
-        buttons_navigation,
+     #   buttons_navigation,
 
         dbc.Row([
             dbc.Col([

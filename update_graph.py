@@ -45,7 +45,7 @@ def update_graph(selected_city, data, G, pos, hide_matching_municipality=False):
             },
             'title': title,
             'height': 700,
-            'width': 700,
+            'width': 800,
         }
     }
 
