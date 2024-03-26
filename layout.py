@@ -5,8 +5,6 @@ import dash_bootstrap_components as dbc
 from callbacks import create_line_chart
 def create_layout(df):
 
-    
-
     # Adicionando botões de navegação acima do dropdown
     buttons_navigation = dbc.Row([
         dbc.Col(dcc.Link(dbc.Button("Ir para Malária", color="primary", className='nav-button'), href="/pagina_malaria"), width=6),

@@ -11,8 +11,10 @@ import layout
 from dash import dcc
 import callbacks
 import plotly.express as px
-external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css']
+import pandas as pd
 
+# Definição do aplicativo Dash
+external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css']
 app = Dash(__name__, external_stylesheets=external_stylesheets, suppress_callback_exceptions=True)
 
 # Carregar os dados
@@ -23,11 +25,13 @@ G = create_graph(df)
 pos = nx.get_node_attributes(G, 'pos')
 node_color = ['blue' if node in df['mun_noti'].values else 'green' for node in G.nodes()]
 
+# Definição do layout do aplicativo Dash
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     html.Div(id='page-content'),
 ])
 
+# Callback para renderizar os diferentes layouts com base na URL
 @app.callback(
     Output('page-content', 'children'),
     [Input('url', 'pathname')]
@@ -41,9 +45,8 @@ def display_page(pathname):
         return create_info_layout(df)
     else:
         return '404 - Página não encontrada'
-    
 
-
+# Callback para atualizar o conteúdo quando o botão de atualização é clicado
 @app.callback(Output('url', 'pathname'), [Input('update-button', 'n_clicks')])
 def refresh_page(n_clicks):
     if n_clicks is not None and n_clicks > 0:
