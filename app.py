@@ -16,7 +16,7 @@ import pandas as pd
 # Definição do aplicativo Dash
 external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css']
 app = Dash(__name__, external_stylesheets=external_stylesheets, suppress_callback_exceptions=True)
-
+server = app.server
 # Carregar os dados
 df = load_data('Definitivo.csv', nrows=66887)
 df['notificacoes_proprias'] = df.groupby('mun_noti')['notifications'].transform('sum')
