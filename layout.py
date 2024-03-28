@@ -1,133 +1,78 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 
-
-from callbacks import create_line_chart
 def create_layout(df):
+    # Título e Subtítulo
+    header = html.H2('Dashboard de Malária', className='text-center mt-3 mb-4')
+    subheader = html.H4('', className='text-center mb-5')
 
-    # Adicionando botões de navegação acima do dropdown
-    buttons_navigation = dbc.Row([
-        dbc.Col(dcc.Link(dbc.Button("Ir para Malária", color="primary", className='nav-button'), href="/pagina_malaria"), width=6),
-        dbc.Col(dcc.Link(dbc.Button("Ir para Outra Página", color="primary", className='nav-button'), href="/outra_pagina"), width=6),
-    ], style={'margin-top': '20px'})
-
-    # Dropdown para seleção de cidade
-    options_cidade_dropdown = [{'label': f'{mun_noti} - {df[df["mun_noti"] == mun_noti]["nome_noti"].iloc[0]}', 'value': mun_noti} for mun_noti in df['mun_noti'].unique()]
-    options_cidade_dropdown.insert(0, {'label': 'Todas as cidades', 'value': 'Todas'})
-
-    # Layout do filtro e seleção de cidade
+    # Dropdown de Seleção de Cidade
+    cidade_options = [
+        {'label': f'{mun_noti} - {df[df["mun_noti"] == mun_noti]["nome_noti"].iloc[0]}', 'value': mun_noti}
+        for mun_noti in df['mun_noti'].unique()
+    ]
+    cidade_options.insert(0, {'label': 'Todas as cidades', 'value': 'Todas'})
     cidade_dropdown = dcc.Dropdown(
         id='cidade-dropdown',
-        options=options_cidade_dropdown,
+        options=cidade_options,
         value='Todas',
-        style={'width': '100%'}  # Aumentando a largura do dropdown
+        clearable=False,
+        style={'color': '#000'}  # Melhora a legibilidade do texto
     )
-    update_button = dbc.Button(
-    'Mostrar todas as cidades',
-    id='update-button',
-    n_clicks=0,
-    color='primary',
-    style={'margin-top': '10px'}
-)
-    
 
+    # Checklists e Botões
     hide_matching_checkbox = dcc.Checklist(
         id='hide-matching-municipality',
         options=[{'label': 'Ocultar infecções ocorridas no próprio município', 'value': 'hide'}],
-        value=[]
+        value=[],
+        className='mb-3'
+    )
+    update_button = dbc.Button(
+        'Mostrar Todas as Cidades',
+        id='update-button',
+        n_clicks=0,
+        color='info',
+        className='mb-3'
     )
 
-    # Layout dos gráficos
-    grafo_direcional = dcc.Graph(
-        id='grafo-direcional',
-        config={'scrollZoom': False, 'displayModeBar': True},
-        #style={'height': '400px'}
-    )
-
-    grafico_colunas = dcc.Graph(
-        id='grafico-colunas',
-       # style={'height': '400px'}
-    )
-
-
-    # Criando o Dropdown de Ano
+    # Range Slider de Ano
     anos_unicos = sorted(df['ano'].dropna().unique())
-    options_ano_dropdown = [
-        {'label': 'Todos os anos', 'value': 'Todos'},
-        * [{'label': str(ano), 'value': str(ano)} for ano in anos_unicos]
-    ]
-
-     # Gere uma lista de anos pares
-    anos_pares = [ano for ano in anos_unicos if ano % 2 == 0]
-
-    # Configure o RangeSlider para exibir todos os anos, mas visualmente de dois em dois
     ano_range_slider = dcc.RangeSlider(
         id='ano-range-slider',
         min=min(anos_unicos),
         max=max(anos_unicos),
-        step=1,  # Mantenha o passo como 1 para incluir todos os anos
-        marks={str(ano): str(ano) if ano % 2 == 0 else '' for ano in anos_unicos},
-        value=[min(anos_unicos), max(anos_unicos)],  # Defina o intervalo inicial
+        step=1,
+        marks={str(ano): str(ano) for ano in anos_unicos if ano % 2 == 0},  # Marcadores para anos pares
+        value=[min(anos_unicos), max(anos_unicos)],
+        className='mb-3'
     )
 
+    # Gráficos
+    grafo_direcional = dcc.Graph(id='grafo-direcional', className='mb-3')
+    grafico_colunas = dcc.Graph(id='grafico-colunas', className='mb-3')
+    grafico_linha = dcc.Graph(id='line-chart', className='mb-3')
 
-    # Layout dos gráficos lado a lado
-    graficos_lado_a_lado = html.Div([
-        html.Div([
-            dcc.Loading(
-                id="loading-graficos",
-                type="circle",
-                children=[
-                    html.Div([
-                        grafo_direcional,
-                        grafico_colunas,
-                    ], style={'width': '100%', 'display': 'flex'}),
-                ],
-            ),
-        ], key='graficos_lado_a_lado_key'),
-    ], key='graficos_lado_a_lado_loading_key')
-
-    # Bloco separado para o gráfico de linha
-    grafico_linha = dbc.Row([
-    dbc.Col([
-        dcc.Graph(id='line-chart')  # Certifique-se de usar o mesmo ID definido no callback
-    ], width=12),
-])
-    # Montagem do layout final
+    # Organização do Layout com uma estética aprimorada
     layout = html.Div([
-     #   buttons_navigation,
-
-        dbc.Row([
-            dbc.Col([
-                html.Label('Selecione a cidade:'),
-                cidade_dropdown,
-            ], width=4),
-
-            dbc.Col([
-                html.Label(''),
-                hide_matching_checkbox,
-            ], width=4),
-
-            # Substitua a seção do layout onde o dropdown de ano é adicionado pelo RangeSlider
-            dbc.Col([
-            html.Label('Selecione o intervalo de anos:'),
-            ano_range_slider,
-            # Adicione a linha informativa para exibir o intervalo selecionado por extenso
-            html.Div(id='intervalo-selecionado', style={'margin-top': '10px'}),
-    ], width=4),
-            dbc.Col([
-            update_button,  # Adicione o novo botão de atualização
-        ], width=4),
-        ], className='filter-section'),
-
-        # Adicione os blocos de gráfico ao layout
-     # Adicione o indicador de carregamento e os blocos de gráfico ao layout
-    html.Div([
-        graficos_lado_a_lado,
-        grafico_linha,
-    ], style={'width': '100%'}),
-
-        
-    ], style={'height': '800px'})
+        dbc.Container([
+            header,
+            #subheader,
+            dbc.Row([
+                dbc.Col(cidade_dropdown, width=12, lg=4),
+                dbc.Col(hide_matching_checkbox, width=12, lg=4),
+                dbc.Col(update_button, width=12, lg=4, className='d-flex justify-content-lg-end align-items-start'),
+            ], className='mb-5'),
+            dbc.Row([
+                dbc.Col(ano_range_slider, width=12),
+            ], className='mb-5'),
+            dbc.Row([
+                dbc.Col(grafo_direcional, md=6),
+                dbc.Col(grafico_colunas, md=6),
+            ], className='mb-4'),
+            dbc.Row([
+                dbc.Col(grafico_linha, width=12),
+            ]),
+        ], fluid=True),
+    ], style={'padding': '20px'})
 
     return layout
