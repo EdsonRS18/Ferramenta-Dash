@@ -32,7 +32,7 @@ def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_m
         grafico_colunas = {
             'data': [trace_mun_infe],
             'layout': {
-                'title': f'TOP 10 Municípios de Infecção{selected_years}',
+                'title': f'<b>TOP 10 Municípios de Infecção{selected_years}<b>',
                 'height': 700,
                 'width': 600,
                 'yaxis': {
@@ -72,7 +72,13 @@ def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_m
         grafico_colunas = {
         'data': [trace_mun_infe],
         'layout': {
-            'title': f'TOP 10 Municípios de Infecção (Relacionado a {selected_city_name}){selected_years}',
+            'title': {
+                'text': f'<b>TOP 10 Municípios de Infecção</b><br><b>(Relacionado a {selected_city_name}){selected_years}<b>',
+                'x': 0.5,  # Posicionamento centralizado
+                'xanchor': 'center',
+                'yanchor': 'top',
+                'wrap': 150,  # Largura máxima antes de quebrar a linha
+            },
             'height': 700,
             'width': 600,
             'yaxis': {
@@ -86,6 +92,7 @@ def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_m
             'margin': {'l': 150},
         }
     }
+
 
     return grafo_direcional, grafico_colunas, selected_city
 
@@ -104,7 +111,7 @@ def create_line_chart(df, selected_year=None):
     else:
         df_aggregated['percentagem'] = (df_aggregated['notifications'] / df_aggregated['notifications'].sum()) * 100
 
-    line_chart = px.line(df_aggregated, x='ano', y='percentagem', markers=True, title='Evolução de Notificações de Malária ao Longo dos Anos')
+    line_chart = px.line(df_aggregated, x='ano', y='percentagem', markers=True)
 
     line_chart.update_layout(
         xaxis_title='Ano',

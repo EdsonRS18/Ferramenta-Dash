@@ -30,10 +30,10 @@ def update_graph(selected_city, data, G, pos, hide_matching_municipality=False):
     if selected_city != 'Todas':
         selected_city_name = filtered_df['nome_noti'].iloc[0]
         total_notifications = filtered_df['notifications'].sum()
-        title = f'Município Selecionado: {selected_city_name}'
+        title = f'<b>Município Selecionado: {selected_city_name}<b>'
     else:
         selected_city_name = "Todas as cidades"
-        title = f'Município Selecionado: {selected_city_name}'
+        title = f'<b>Município Selecionado: {selected_city_name}<b>'
 
     return {
         'data': traces,

@@ -100,15 +100,20 @@ def update_line_chart(selected_cidade):
         df_aggregated = df[df['mun_noti'] == selected_cidade].groupby('ano')['notifications'].sum().reset_index()
 
     line_chart = px.line(df_aggregated, x='ano', y='notifications', markers=True, title=f'Evolução da Malária em {selected_city_name} de 2003 a 2022')
-    
+
     line_chart.update_layout(
         xaxis_title='Ano',
-        yaxis_title='Número de Notificações de Malária',
+        yaxis_title='Número de Notificações',
         height=400,
+        title={
+            'text': f'<b>Evolução da Malária em {selected_city_name} de 2003 a 2022</b>'
+        }
     )
 
     return line_chart
 
+
+    return line_chart
 @app.callback(
     Output('intervalo-selecionado', 'children'),
     [Input('ano-range-slider', 'value')]

@@ -3,7 +3,11 @@ import dash_bootstrap_components as dbc
 
 def create_layout(df):
     # Título e Subtítulo
-    header = html.H2('Painel de Infecções e Notificações de Malária', className='text-center mt-3 mb-4')
+    header = html.H2(
+        'MaláriaVis',
+        className='text-center mt-3 mb-4',
+        style={'background-color': '#4169E1', 'color': 'white', 'padding': '10px', 'margin': '0px'}  # Removido padding lateral e adicionado margin 0
+    )
     subheader = html.H4('', className='text-center mb-5')
 
     # Dropdown de Seleção de Cidade
@@ -17,27 +21,27 @@ def create_layout(df):
         options=cidade_options,
         value='Todas',
         clearable=False,
-        style={'color': '#000'}  # Melhora a legibilidade do texto
+        style={'color': '#000'}
     )
 
     hide_matching_checkbox = html.Div([
-    html.Label([
-        dcc.Checklist(
-            id='hide-matching-municipality',
-            options=[{'label': '   Ocultar infecções ocorridas no próprio município', 'value': 'hide'}],
-            value=[],
-            # Removido o style inline para ajuste via CSS
-            className='custom-checkbox-label',  # Classe customizada para estilizar especificamente este label
-        )
-    ], style={'display': 'block', 'margin-left': '20px'}),  # Adiciona um espaço à esquerda do checkbox
-], className='mb-3')
+        html.Label([
+            dcc.Checklist(
+                id='hide-matching-municipality',
+                options=[{'label': '   Ocultar infecções ocorridas no próprio município', 'value': 'hide'}],
+                value=[],
+                className='custom-checkbox-label',
+            )
+        ], style={'display': 'block', 'margin-left': '20px'}),
+    ], className='mb-3')
 
     update_button = dbc.Button(
-        'Mostrar Todas as Cidades',
-        id='update-button',
-        n_clicks=0,
-        color='info',
-        className='mb-3'
+    'Limpar Filtros',
+    id='update-button',
+    n_clicks=0,
+    color='info',
+    style={'fontWeight': 'bold'},  # Define o estilo da fonte como negrito
+    className='mb-3'
     )
 
     # Range Slider de Ano
@@ -47,7 +51,7 @@ def create_layout(df):
         min=min(anos_unicos),
         max=max(anos_unicos),
         step=1,
-        marks={str(ano): str(ano) for ano in anos_unicos if ano % 2 == 0},  # Marcadores para anos pares
+        marks={str(ano): str(ano) for ano in anos_unicos if ano % 2 == 0},
         value=[min(anos_unicos), max(anos_unicos)],
         className='mb-3'
     )
@@ -75,39 +79,12 @@ def create_layout(df):
         )
     ])
 
-    # Inserindo as imagens JPG e PNG
-
-    img_upe_url = "https://upload.wikimedia.org/wikipedia/commons/9/9b/Logo-upe-site.png"
-    img_dotlab_url = "https://avatars.githubusercontent.com/u/72280399?s=280&v=4"
-
-
-
-
-        # Cria as tags de imagem
-    img_jpg = html.Img(src=img_upe_url, className='img-fluid', style={'max-height': '100px', 'max-width': '100px'})
-    img_png = html.Img(src=img_dotlab_url, className='img-fluid', style={'max-height': '100px', 'max-width': '100px'})
-
-    # Coluna para as imagens com ajuste para centralização horizontal e vertical
-    images_column = dbc.Col(
-        html.Div(
-            [img_jpg, img_png],
-            className='d-flex justify-content-center align-items-center',  # Centraliza as imagens na coluna
-            style={'height': '100%'}  # Assegura que o div interno ocupe toda a altura da coluna, para o alinhamento vertical funcionar
-        ),
-        width=4,
-        className='d-flex justify-content-end align-items-start',  # Estes estilos podem ser ajustados ou removidos conforme o desejado
-    )
     # Cria o layout da aplicação
-    # Atualiza a estrutura do layout para incluir a coluna de imagens atualizada
     layout = html.Div([
         dbc.Container([
             dbc.Row([
-                dbc.Col([header], width=8),  # Coluna para o título com 8 espaços
-                images_column,  # Coluna atualizada para as imagens
-        ], className='mb-5 align-items-center'),  # Alinhar verticalmente o conteúdo da linha ao centro # Alinhar verticalmente o conteúdo da linha ao centro
-            dbc.Row([
-                dbc.Col([], width=12),  # Coluna vazia para criar espaço
-            ], className='mb-2'),  # Definindo a margem apenas abaixo do título
+                dbc.Col([header, subheader], width=12),  # Ajustado para ocupar toda a linha
+            ], className='mb-5 align-items-center'),
             dbc.Row([
                 dbc.Col(cidade_dropdown, width=12, lg=4),
                 dbc.Col(hide_matching_checkbox, width=12, lg=4),
@@ -127,3 +104,4 @@ def create_layout(df):
     ], style={'padding': '20px'})
 
     return layout
+
