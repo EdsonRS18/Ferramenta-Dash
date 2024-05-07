@@ -111,9 +111,8 @@ def update_line_chart(selected_cidade):
     )
 
     return line_chart
+    
 
-
-    return line_chart
 @app.callback(
     Output('intervalo-selecionado', 'children'),
     [Input('ano-range-slider', 'value')]

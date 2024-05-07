@@ -27,14 +27,16 @@ def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_m
             hoverinfo='x',
             orientation='h',
             name='mun_infe',
+            marker_color='#4169E1'
+
         )
 
         grafico_colunas = {
             'data': [trace_mun_infe],
             'layout': {
-                'title': f'<b>TOP 10 Municípios de Infecção{selected_years}<b>',
+                'title': f'<b>TOP 10 Municípios de Infecção<b>',
                 'height': 700,
-                'width': 600,
+                'width': 623,
                 'yaxis': {
                     'tickmode': 'linear',
                     'tickvals': list(range(10)),
@@ -67,13 +69,15 @@ def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_m
             hoverinfo='text+x',
             orientation='h',
             name='mun_infe',
+            marker_color='#4169E1'
+
         )
 
         grafico_colunas = {
         'data': [trace_mun_infe],
         'layout': {
             'title': {
-                'text': f'<b>TOP 10 Municípios de Infecção</b><br><b>(Relacionado a {selected_city_name}){selected_years}<b>',
+                'text': f'<b>TOP 10 Municípios de Infecção</b><br><b>(Relacionado a {selected_city_name})<b>',
                 'x': 0.5,  # Posicionamento centralizado
                 'xanchor': 'center',
                 'yanchor': 'top',
@@ -107,11 +111,11 @@ def create_line_chart(df, selected_year=None):
 
     if selected_year:
         total_notifications_selected_year = df[df['ano'] == selected_year]['notifications'].sum()
-        df_aggregated['percentagem'] = (df_aggregated['notifications'] / total_notifications_selected_year) * 100
+        df_aggregated['percentagem'] = (df_aggregated   ['notifications'] / total_notifications_selected_year) * 100
     else:
         df_aggregated['percentagem'] = (df_aggregated['notifications'] / df_aggregated['notifications'].sum()) * 100
 
-    line_chart = px.line(df_aggregated, x='ano', y='percentagem', markers=True)
+    line_chart = px.line(df_aggregated, x='ano', y='percentagem', markers=True, line_color='#4169E1', marker_color='#4169E1')
 
     line_chart.update_layout(
         xaxis_title='Ano',

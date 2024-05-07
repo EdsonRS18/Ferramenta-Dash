@@ -2,15 +2,18 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 
 def create_layout(df):
-    # Título e Subtítulo
     header = html.H2(
-        'MaláriaVis',
-        className='text-center mt-3 mb-4',
-        style={'background-color': '#4169E1', 'color': 'white', 'padding': '10px', 'margin': '0px'}  # Removido padding lateral e adicionado margin 0
-    )
-    subheader = html.H4('', className='text-center mb-5')
+    'MaláriaVis',
+    className='text-center mt-1 mb-0',
+    style={
+        'background-color': '#4169E1',
+        'color': 'white',
+        'padding': '10px',
+        'margin': '0px',
+        'border': '0.5px solid #4169E1'  # Adiciona um contorno sólido branco com 2px de largura
+    }
+)
 
-    # Dropdown de Seleção de Cidade
     cidade_options = [
         {'label': f'{mun_noti} - {df[df["mun_noti"] == mun_noti]["nome_noti"].iloc[0]}', 'value': mun_noti}
         for mun_noti in df['mun_noti'].unique()
@@ -22,6 +25,7 @@ def create_layout(df):
         value='Todas',
         clearable=False,
         style={'color': '#000'}
+        
     )
 
     hide_matching_checkbox = html.Div([
@@ -39,12 +43,15 @@ def create_layout(df):
     'Limpar Filtros',
     id='update-button',
     n_clicks=0,
-    color='info',
-    style={'fontWeight': 'bold'},  # Define o estilo da fonte como negrito
+    style={
+        'background-color': '#4169E1',  # Define a cor de fundo do botão
+        'color': 'white',               # Define a cor do texto para branco para melhor contraste
+        'fontWeight': 'bold'            # Mantém o texto em negrito
+    },
     className='mb-3'
-    )
+)
 
-    # Range Slider de Ano
+
     anos_unicos = sorted(df['ano'].dropna().unique())
     ano_range_slider = dcc.RangeSlider(
         id='ano-range-slider',
@@ -56,52 +63,52 @@ def create_layout(df):
         className='mb-3'
     )
 
-    # Gráficos com Spinners
-    grafo_direcional = html.Div([
-        dcc.Loading(
-            id="loading-grafo-direcional",
-            type="circle",
-            children=dcc.Graph(id='grafo-direcional', className='mb-3')
-        )
-    ])
-    grafico_colunas = html.Div([
-        dcc.Loading(
-            id="loading-grafico-colunas",
-            type="circle",
-            children=dcc.Graph(id='grafico-colunas', className='mb-3')
-        )
-    ])
-    grafico_linha = html.Div([
-        dcc.Loading(
-            id="loading-grafico-linha",
-            type="circle",
-            children=dcc.Graph(id='line-chart', className='mb-3')
-        )
-    ])
+    # Seção de Filtros com fundo mais escuro
+    filter_section = html.Div([
+        dbc.Row([
+            dbc.Col(cidade_dropdown, width=12, lg=4),
+            dbc.Col(hide_matching_checkbox, width=12, lg=4),
+            dbc.Col(update_button, width=12, lg=4, className='d-flex justify-content-lg-end align-items-start'),
+        ], className='mb-5'),
+        dbc.Row([
+            dbc.Col(ano_range_slider, width=12),
+        ], className='mb-5')
+    ], style={'background-color': '#F0F8FF', 'padding': '20px', 'border': '0.5px solid #4169E1'})  # Ajuste de cor e padding conforme necessário
 
-    # Cria o layout da aplicação
     layout = html.Div([
         dbc.Container([
             dbc.Row([
-                dbc.Col([header, subheader], width=12),  # Ajustado para ocupar toda a linha
-            ], className='mb-5 align-items-center'),
+                dbc.Col([header], width=12),
+            ]),
+            
+            filter_section,  # Inclusão da seção de filtros
             dbc.Row([
-                dbc.Col(cidade_dropdown, width=12, lg=4),
-                dbc.Col(hide_matching_checkbox, width=12, lg=4),
-                dbc.Col(update_button, width=12, lg=4, className='d-flex justify-content-lg-end align-items-start'),
-            ], className='mb-5'),
-            dbc.Row([
-                dbc.Col(ano_range_slider, width=12),
-            ], className='mb-5'),
-            dbc.Row([
-                dbc.Col(grafo_direcional, md=6),
-                dbc.Col(grafico_colunas, md=6),
+                dbc.Col(html.Div([
+                    dcc.Loading(
+                        id="loading-grafo-direcional",
+                        type="circle",
+                        children=dcc.Graph(id='grafo-direcional', className='mb-3')
+                    )
+                ]), width={'size': 12, 'order': 1}, lg=6),  # O gráfico ocupará 6 unidades de largura em telas grandes (lg)
+                dbc.Col(html.Div([
+                    dcc.Loading(
+                        id="loading-grafico-colunas",
+                        type="circle",
+                        children=dcc.Graph(id='grafico-colunas', className='mb-2')
+                    )
+                ]), width={'size': 12, 'order': 2}, lg=6),  # O gráfico de colunas também ocupará 6 unidades de largura em telas grandes (lg)
             ], className='mb-4'),
+
             dbc.Row([
-                dbc.Col(grafico_linha, width=12),
+                dbc.Col(html.Div([
+                    dcc.Loading(
+                        id="loading-grafico-linha",
+                        type="circle",
+                        children=dcc.Graph(id='line-chart', className='mb-3')
+                    )
+                ]), width=12),
             ]),
         ], fluid=True),
-    ], style={'padding': '20px'})
+    ], style={'padding': '20px', 'backgroundColor': '#b6b6b8'})
 
     return layout
-
