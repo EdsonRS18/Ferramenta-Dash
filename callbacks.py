@@ -36,7 +36,6 @@ def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_m
             'layout': {
                 'title': f'<b>TOP 10 Municípios de Infecção<b>',
                 'height': 700,
-                'width': 623,
                 'yaxis': {
                     'tickmode': 'linear',
                     'tickvals': list(range(10)),
@@ -84,7 +83,6 @@ def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_m
                 'wrap': 150,  # Largura máxima antes de quebrar a linha
             },
             'height': 700,
-            'width': 600,
             'yaxis': {
                 'tickmode': 'linear',
                 'tickvals': dados_grafico_colunas['nome_infe'],

@@ -89,16 +89,15 @@ def create_layout(df):
                         type="circle",
                         children=dcc.Graph(id='grafo-direcional', className='mb-3')
                     )
-                ]), width={'size': 12, 'order': 1}, lg=6),  # O gráfico ocupará 6 unidades de largura em telas grandes (lg)
+                ]), width=6),
                 dbc.Col(html.Div([
                     dcc.Loading(
                         id="loading-grafico-colunas",
                         type="circle",
-                        children=dcc.Graph(id='grafico-colunas', className='mb-2')
+                        children=dcc.Graph(id='grafico-colunas', className='mb-3')
                     )
-                ]), width={'size': 12, 'order': 2}, lg=6),  # O gráfico de colunas também ocupará 6 unidades de largura em telas grandes (lg)
-            ], className='mb-4'),
-
+                ]), width=6),
+            ]),
             dbc.Row([
                 dbc.Col(html.Div([
                     dcc.Loading(
@@ -109,6 +108,8 @@ def create_layout(df):
                 ]), width=12),
             ]),
         ], fluid=True),
-    ], style={'padding': '20px'})
+    ], style={'padding': '20px', 'backgroundColor': '#b6b6b8'})
 
     return layout
+
+
