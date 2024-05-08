@@ -89,15 +89,17 @@ def create_layout(df):
                         type="circle",
                         children=dcc.Graph(id='grafo-direcional', className='mb-3')
                     )
-                ]), width=6),
+                ]), width=6, style={'margin-top': '20px'}),  # Adicionando margem superior de 20px
                 dbc.Col(html.Div([
                     dcc.Loading(
                         id="loading-grafico-colunas",
                         type="circle",
                         children=dcc.Graph(id='grafico-colunas', className='mb-3')
                     )
-                ]), width=6),
+                ]), width=6, style={'margin-top': '20px'}),  # Adicionando margem superior de 20px
+                
             ]),
+            
             dbc.Row([
                 dbc.Col(html.Div([
                     dcc.Loading(
@@ -111,5 +113,4 @@ def create_layout(df):
     ], style={'padding': '20px', 'backgroundColor': '#b6b6b8'})
 
     return layout
-
 
