@@ -110,7 +110,7 @@ def create_layout(df):
                 ]), width=12),
             ]),
         ], fluid=True),
-    ], style={'padding': '20px', 'backgroundColor': '#b6b6b8'})
+    ], style={'padding': '20px'})
 
     return layout
 
