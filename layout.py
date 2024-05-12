@@ -19,14 +19,22 @@ def create_layout(df):
         for mun_noti in df['mun_noti'].unique()
     ]
     cidade_options.insert(0, {'label': 'Todas as cidades', 'value': 'Todas'})
-    cidade_dropdown = dcc.Dropdown(
-        id='cidade-dropdown',
-        options=cidade_options,
-        value='Todas',
-        clearable=False,
-        style={'color': '#000'}
-        
-    )
+    
+    titulo_tamanho = len("Selecione a cidade:") * 18  # Aproximadamente 8 pixels por caractere
+
+    cidade_dropdown = html.Div([
+        html.Div([
+            html.H6("Selecione a cidade:", style={'font-family': 'Arial, sans-serif', 'margin-right': '10px', 'width': f'{titulo_tamanho}px'}),  # Título com largura baseada no texto
+            dcc.Dropdown(
+                id='cidade-dropdown',
+                options=cidade_options,
+                value='Todas',
+                clearable=False,
+                style={'color': '#000', 'border-radius': '0px', 'width': f'{titulo_tamanho}px'}  # Definindo largura igual à do título
+                )
+        ], style={'display': 'flex', 'align-items': 'center'})
+])
+
 
     hide_matching_checkbox = html.Div([
         html.Label([
@@ -36,7 +44,7 @@ def create_layout(df):
                 value=[],
                 className='custom-checkbox-label',
             )
-        ], style={'display': 'block', 'margin-left': '20px'}),
+        ], style={'display': 'block', 'margin-left': '20px', 'font-family': 'Arial, sans-serif'}),  # Definindo a mesma fonte para as opções
     ], className='mb-3')
 
     update_button = dbc.Button(
@@ -46,7 +54,8 @@ def create_layout(df):
     style={
         'background-color': '#4169E1',  # Define a cor de fundo do botão
         'color': 'white',               # Define a cor do texto para branco para melhor contraste
-        'fontWeight': 'bold'            # Mantém o texto em negrito
+        'fontWeight': 'bold',            # Mantém o texto em negrito
+        'border-radius': '0px'
     },
     className='mb-3'
 )
@@ -66,12 +75,12 @@ def create_layout(df):
     # Seção de Filtros com fundo mais escuro
     filter_section = html.Div([
         dbc.Row([
-            dbc.Col(cidade_dropdown, width=12, lg=4),
+            dbc.Col(cidade_dropdown, width=12, lg=5),
             dbc.Col(hide_matching_checkbox, width=12, lg=4),
-            dbc.Col(update_button, width=12, lg=4, className='d-flex justify-content-lg-end align-items-start'),
-        ], className='mb-5'),
+            dbc.Col(update_button, width=12, lg=3, className='d-flex justify-content-lg-end align-items-start'),
+        ], className='mb-4'),
         dbc.Row([
-            dbc.Col(ano_range_slider, width=12),
+            dbc.Col(ano_range_slider, width=12,),
         ], className='mb-5')
     ], style={'background-color': '#F0F8FF', 'padding': '20px', 'border': '0.5px solid #4169E1'})  # Ajuste de cor e padding conforme necessário
 
