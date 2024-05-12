@@ -3,16 +3,16 @@ import dash_bootstrap_components as dbc
 
 def create_layout(df):
     header = html.H2(
-    'MaláriaVis',
-    className='text-center mt-1 mb-0',
-    style={
-        'background-color': '#4169E1',
-        'color': 'white',
-        'padding': '10px',
-        'margin': '0px',
-        'border': '0.5px solid #4169E1'  # Adiciona um contorno sólido branco com 2px de largura
-    }
-)
+        'MaláriaVis',
+        className='text-center mt-1 mb-0',
+        style={
+            'background-color': '#4169E1',
+            'color': 'white',
+            'padding': '10px',
+            'margin': '0px',
+            'border': '0.5px solid #4169E1'  # Adiciona um contorno sólido branco com 2px de largura
+        }
+    )
 
     cidade_options = [
         {'label': f'{mun_noti} - {df[df["mun_noti"] == mun_noti]["nome_noti"].iloc[0]}', 'value': mun_noti}
@@ -20,46 +20,46 @@ def create_layout(df):
     ]
     cidade_options.insert(0, {'label': 'Todas as cidades', 'value': 'Todas'})
     
-    titulo_tamanho = len("Selecione a cidade:") * 18  # Aproximadamente 8 pixels por caractere
-
     cidade_dropdown = html.Div([
-        html.Div([
-            html.H6("Selecione a cidade:", style={'font-family': 'Arial, sans-serif', 'margin-right': '10px', 'width': f'{titulo_tamanho}px'}),  # Título com largura baseada no texto
+    dbc.Row([
+        dbc.Col(html.Label("Selecione a cidade:", style={'font-family': 'Arial, sans-serif', 'margin-right': '10px'}), width=3),
+        dbc.Col(
             dcc.Dropdown(
                 id='cidade-dropdown',
                 options=cidade_options,
                 value='Todas',
                 clearable=False,
-                style={'color': '#000', 'border-radius': '0px', 'width': f'{titulo_tamanho}px'}  # Definindo largura igual à do título
-                )
-        ], style={'display': 'flex', 'align-items': 'center'})
+                style={'color': '#000', 'border-radius': '0px'}
+            ),
+            width=9
+        ),
+    ], style={'margin-bottom': '10px'})
 ])
-
+  
 
     hide_matching_checkbox = html.Div([
         html.Label([
             dcc.Checklist(
                 id='hide-matching-municipality',
-                options=[{'label': '   Ocultar infecções ocorridas no próprio município', 'value': 'hide'}],
+                options=[{'label': 'Ocultar infecções ocorridas no próprio município', 'value': 'hide'}],
                 value=[],
                 className='custom-checkbox-label',
             )
-        ], style={'display': 'block', 'margin-left': '20px', 'font-family': 'Arial, sans-serif'}),  # Definindo a mesma fonte para as opções
+        ], style={'display': 'block', 'margin-left': '20px', 'font-family': 'Arial, sans-serif', 'margin-bottom': '10px'}),  # Definindo a mesma fonte para as opções e margem inferior
     ], className='mb-3')
 
     update_button = dbc.Button(
-    'Limpar Filtros',
-    id='update-button',
-    n_clicks=0,
-    style={
-        'background-color': '#4169E1',  # Define a cor de fundo do botão
-        'color': 'white',               # Define a cor do texto para branco para melhor contraste
-        'fontWeight': 'bold',            # Mantém o texto em negrito
-        'border-radius': '0px'
-    },
-    className='mb-3'
-)
-
+        'Limpar Filtros',
+        id='update-button',
+        n_clicks=0,
+        style={
+            'background-color': '#4169E1',  # Define a cor de fundo do botão
+            'color': 'white',               # Define a cor do texto para branco para melhor contraste
+            'fontWeight': 'bold',            # Mantém o texto em negrito
+            'border-radius': '0px'
+        },
+        className='mb-3'
+    )
 
     anos_unicos = sorted(df['ano'].dropna().unique())
     ano_range_slider = dcc.RangeSlider(
@@ -78,7 +78,7 @@ def create_layout(df):
             dbc.Col(cidade_dropdown, width=12, lg=5),
             dbc.Col(hide_matching_checkbox, width=12, lg=4),
             dbc.Col(update_button, width=12, lg=3, className='d-flex justify-content-lg-end align-items-start'),
-        ], className='mb-4'),
+        ], className='mb-3'),
         dbc.Row([
             dbc.Col(ano_range_slider, width=12,),
         ], className='mb-5')
@@ -122,4 +122,3 @@ def create_layout(df):
     ], style={'padding': '20px'})
 
     return layout
-
