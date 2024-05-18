@@ -34,7 +34,7 @@ def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_m
         grafico_colunas = {
             'data': [trace_mun_infe],
             'layout': {
-                'title': f'<b>TOP 10 Municípios de Infecção<b>',
+                'title': f'<b>Origem das infecções notificadas(top 10)</b><br><b>(Município selecionado: Todos) </b>',
                 'height': 700,
                 'yaxis': {
                     'tickmode': 'linear',
@@ -43,7 +43,7 @@ def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_m
                     'dtick': 1,
                     'automargin': True,
                 },
-                'xaxis': {'title': 'Número de Notificações'},
+                'xaxis': {'title': 'Número de Infecções'},
                 'margin': {'l': 150},
             }
         }
@@ -76,7 +76,7 @@ def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_m
         'data': [trace_mun_infe],
         'layout': {
             'title': {
-                'text': f'<b>TOP 10 Municípios de Infecção</b><br><b>(Relacionado a {selected_city_name})<b>',
+                'text': f'<b>Origem das infecções notificadas(top 10)</b><br><b>(Município selecionado: {selected_city_name})<b>',
                 'x': 0.5,  # Posicionamento centralizado
                 'xanchor': 'center',
                 'yanchor': 'top',
@@ -90,7 +90,7 @@ def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_m
                 'dtick': 1,
                 'automargin': True,
             },
-            'xaxis': {'title': 'Número de Notificações'},
+            'xaxis': {'title': 'Número de Infecções'},
             'margin': {'l': 150},
         }
     }
@@ -122,4 +122,3 @@ def create_line_chart(df, selected_year=None):
     )
 
     return dcc.Graph(id='line-chart', figure=line_chart)
-

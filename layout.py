@@ -35,6 +35,8 @@ def create_layout(df):
         ),
     ], style={'margin-bottom': '10px'})
 ])
+
+
   
 
     hide_matching_checkbox = html.Div([
@@ -44,8 +46,10 @@ def create_layout(df):
                 options=[{'label': 'Ocultar infecções ocorridas no próprio município', 'value': 'hide'}],
                 value=[],
                 className='custom-checkbox-label',
+                inputStyle={'margin-right': '10px'},  # Adiciona espaço entre o checkbox e o label
+
             )
-        ], style={'display': 'block', 'margin-left': '20px', 'font-family': 'Arial, sans-serif', 'margin-bottom': '10px'}),  # Definindo a mesma fonte para as opções e margem inferior
+        ], style={'display': 'block', 'font-family': 'Arial, sans-serif', 'margin-bottom': '10px'}),  # Definindo a mesma fonte para as opções e margem inferior
     ], className='mb-3')
 
     update_button = dbc.Button(

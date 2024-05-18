@@ -1,22 +1,21 @@
 # Importação de bibliotecas necessárias
 from dash import Dash, html, dcc, Input, Output, exceptions
-from dash import dcc
-from dash.dependencies import Input, Output
 from data_utils import load_data, create_graph
 import networkx as nx
+import plotly.express as px
+import pandas as pd
+
 # Importação de funções personalizadas
 from malaria_layout import create_malaria_layout
 from info_layout import create_info_layout
 import layout
-from dash import dcc
 import callbacks
-import plotly.express as px
-import pandas as pd
 
 # Definição do aplicativo Dash
 external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css']
 app = Dash(__name__, external_stylesheets=external_stylesheets, suppress_callback_exceptions=True)
 server = app.server
+
 # Carregar os dados
 df = load_data('Definitivo.csv', nrows=66887)
 df['notificacoes_proprias'] = df.groupby('mun_noti')['notifications'].transform('sum')
@@ -53,7 +52,6 @@ def refresh_page(n_clicks):
         return '/'
     raise exceptions.PreventUpdate
 
-
 @app.callback(
     [
         Output('grafo-direcional', 'figure'),
@@ -79,39 +77,44 @@ def update_graph_callback(selected_cidade, click_data, hide_matching_municipalit
         else:
             df_filtered = df.copy()
 
-
-
         return callbacks.update_graph_callback(selected_cidade, click_data, df_filtered, G, pos, hide_matching_municipality, selected_ano)
 
 @app.callback(
     Output('line-chart', 'figure'),
-    [Input('cidade-dropdown', 'value')]
+    [Input('cidade-dropdown', 'value'),
+     Input('ano-range-slider', 'value')]
 )
-def update_line_chart(selected_cidade):
+def update_line_chart(selected_cidade, selected_ano):
     df_filtered = df
+
+    if selected_ano and len(selected_ano) == 2:
+        df_filtered = df_filtered[df_filtered['ano'].between(int(selected_ano[0]), int(selected_ano[1]))]
 
     filtered_df = df_filtered[df_filtered['mun_noti'] == selected_cidade]
 
     selected_city_name = filtered_df['nome_noti'].iloc[0] if not filtered_df.empty else "Todos os municípios"
 
     if selected_cidade == 'Todas':
-        df_aggregated = df.groupby('ano')['notifications'].sum().reset_index()
+        df_aggregated = df_filtered.groupby('ano')['notifications'].sum().reset_index()
     else:
-        df_aggregated = df[df['mun_noti'] == selected_cidade].groupby('ano')['notifications'].sum().reset_index()
+        df_aggregated = df_filtered[df_filtered['mun_noti'] == selected_cidade].groupby('ano')['notifications'].sum().reset_index()
 
-    line_chart = px.line(df_aggregated, x='ano', y='notifications', markers=True, title=f'Evolução da Malária em {selected_city_name} de 2003 a 2022')
+    line_chart = px.line(df_aggregated, x='ano', y='notifications', markers=True, title=f'Evolução da Malária de {selected_ano[0]} a {selected_ano[1]} em {selected_city_name}')
 
     line_chart.update_layout(
+        xaxis=dict(
+            tickmode='linear',
+            dtick=1
+        ),
         xaxis_title='Ano',
         yaxis_title='Número de Notificações',
         height=400,
         title={
-            'text': f'<b>Evolução da Malária em {selected_city_name} de 2003 a 2022</b>'
+            'text': f'<b>Série histórica (notificações) em {selected_city_name} de {selected_ano[0]} - {selected_ano[1]}</b>'
         }
     )
 
     return line_chart
-    
 
 @app.callback(
     Output('intervalo-selecionado', 'children'),
@@ -136,9 +139,6 @@ def set_default_intervalo(min_value, max_value):
     default_fim = max_value
 
     return [default_inicio, default_fim]
-
-
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)
