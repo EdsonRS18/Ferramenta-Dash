@@ -21,23 +21,22 @@ def create_layout(df):
     cidade_options.insert(0, {'label': 'Todas as cidades', 'value': 'Todas'})
     
     cidade_dropdown = html.Div([
-    dbc.Row([
-        dbc.Col(html.Label("Selecione a cidade:", style={'font-family': 'Arial, sans-serif', 'margin-left': '10px'}), width=3.5),
-        dbc.Col(
-            dcc.Dropdown(
-                id='cidade-dropdown',
-                options=cidade_options,
-                value='Todas',
-                clearable=False,
-                style={'color': '#000', 'border-radius': '0px'}
+        dbc.Row([
+            dbc.Col(html.Label("Selecione a cidade:", style={'margin-top':'8px','font-family': 'Arial, sans-serif', 'margin-left': '30px', 'font-size': '16px'}), width=3.5),
+            dbc.Col(
+                dcc.Dropdown(
+                    id='cidade-dropdown',
+                    options=cidade_options,
+                    value='Todas',
+                    clearable=False,
+                    style={'font-family': 'Arial, sans-serif', 'font-size': '16px', 'color': '#000', 'border-radius': '0px'}
+                ),
+                width=8,  # Ajustando a largura da coluna para 8
             ),
-            width=6
-        ),
-    ], style={'margin-bottom': '10px'})
-])
+        ], style={'margin-bottom': '10px'})
+    ])
 
 
-  
 
     hide_matching_checkbox = html.Div([
         html.Label([
@@ -46,10 +45,9 @@ def create_layout(df):
                 options=[{'label': 'Ocultar infecções ocorridas no próprio município', 'value': 'hide'}],
                 value=[],
                 className='custom-checkbox-label',
-                inputStyle={'margin-right': '10px'},  # Adiciona espaço entre o checkbox e o label
-
+                inputStyle={'margin-top':'12px','margin-right': '10px', 'font-family': 'Arial, sans-serif', 'font-size': '16px'},  # Adiciona espaço entre o checkbox e o label
             )
-        ], style={'display': 'block', 'font-family': 'Arial, sans-serif', 'margin-bottom': '10px'}),  # Definindo a mesma fonte para as opções e margem inferior
+        ], style={'display': 'block', 'font-family': 'Arial, sans-serif', 'margin-bottom': '10px', 'font-size': '16px'}),  # Definindo a mesma fonte para as opções e margem inferior
     ], className='mb-3')
 
     update_button = dbc.Button(
@@ -60,10 +58,14 @@ def create_layout(df):
             'background-color': '#4169E1',  # Define a cor de fundo do botão
             'color': 'white',               # Define a cor do texto para branco para melhor contraste
             'fontWeight': 'bold',            # Mantém o texto em negrito
-            'border-radius': '0px'
+            'border-radius': '0px',
+            'font-family': 'Arial, sans-serif',
+            'font-size': '16px',
+            'margin-right': '30px'
         },
         className='mb-3'
     )
+
 
     anos_unicos = sorted(df['ano'].dropna().unique())
     ano_range_slider = dcc.RangeSlider(
@@ -76,17 +78,18 @@ def create_layout(df):
         className='mb-3'
     )
 
-    # Seção de Filtros com fundo mais escuro
+   # Seção de Filtros com fundo mais escuro
     filter_section = html.Div([
         dbc.Row([
             dbc.Col(cidade_dropdown, width=12, lg=5),
             dbc.Col(hide_matching_checkbox, width=12, lg=4),
             dbc.Col(update_button, width=12, lg=3, className='d-flex justify-content-lg-end align-items-start'),
-        ], className='mb-3'),
+        ], className='mb-3 justify-content-center'),  # Adicionando a classe justify-content-center para centralizar horizontalmente
         dbc.Row([
             dbc.Col(ano_range_slider, width=12,),
-        ], className='mb-5')
+        ], className='mb-5 justify-content-center')  # Adicionando a classe justify-content-center para centralizar horizontalmente
     ], style={'background-color': '#F0F8FF', 'padding': '20px', 'border': '0.5px solid #4169E1'})  # Ajuste de cor e padding conforme necessário
+
 
     layout = html.Div([
         dbc.Container([
