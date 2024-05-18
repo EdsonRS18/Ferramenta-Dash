@@ -34,7 +34,7 @@ def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_m
         grafico_colunas = {
             'data': [trace_mun_infe],
             'layout': {
-                'title': f'<b>Origem das infecções notificadas(top 10)</b><br><b>(Município selecionado: Todos) </b>',
+                'title': f'<b>Origem das infecções notificadas (top 10)</b><br><b>(Município selecionado: Todos) </b>',
                 'height': 700,
                 'yaxis': {
                     'tickmode': 'linear',
@@ -76,7 +76,7 @@ def update_graph_callback(selected_city, click_data, df, G, pos, hide_matching_m
         'data': [trace_mun_infe],
         'layout': {
             'title': {
-                'text': f'<b>Origem das infecções notificadas(top 10)</b><br><b>(Município selecionado: {selected_city_name})<b>',
+                'text': f'<b>Origem das infecções notificadas (top 10)</b><br><b>(Município selecionado: {selected_city_name})<b>',
                 'x': 0.5,  # Posicionamento centralizado
                 'xanchor': 'center',
                 'yanchor': 'top',

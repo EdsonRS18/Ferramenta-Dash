@@ -22,7 +22,7 @@ def create_layout(df):
     
     cidade_dropdown = html.Div([
     dbc.Row([
-        dbc.Col(html.Label("Selecione a cidade:", style={'font-family': 'Arial, sans-serif', 'margin-right': '10px'}), width=3),
+        dbc.Col(html.Label("Selecione a cidade:", style={'font-family': 'Arial, sans-serif', 'margin-left': '10px'}), width=3.5),
         dbc.Col(
             dcc.Dropdown(
                 id='cidade-dropdown',
@@ -31,7 +31,7 @@ def create_layout(df):
                 clearable=False,
                 style={'color': '#000', 'border-radius': '0px'}
             ),
-            width=9
+            width=6
         ),
     ], style={'margin-bottom': '10px'})
 ])
