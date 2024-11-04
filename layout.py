@@ -10,7 +10,7 @@ def create_layout(df):
             'color': 'white',
             'padding': '10px',
             'margin': '0px',
-            'border': '0.5px solid #4169E1'  # Adiciona um contorno sólido branco com 2px de largura
+            'border': '0.5px solid #4169E1'
         }
     )
 
@@ -31,12 +31,10 @@ def create_layout(df):
                     clearable=False,
                     style={'font-family': 'Arial, sans-serif', 'font-size': '16px', 'color': '#000', 'border-radius': '0px'}
                 ),
-                width=8,  # Ajustando a largura da coluna para 8
+                width=8,
             ),
         ], style={'margin-bottom': '10px'})
     ])
-
-
 
     hide_matching_checkbox = html.Div([
         html.Label([
@@ -45,9 +43,9 @@ def create_layout(df):
                 options=[{'label': 'Ocultar infecções ocorridas no próprio município', 'value': 'hide'}],
                 value=[],
                 className='custom-checkbox-label',
-                inputStyle={'margin-top':'12px','margin-right': '10px', 'font-family': 'Arial, sans-serif', 'font-size': '16px'},  # Adiciona espaço entre o checkbox e o label
+                inputStyle={'margin-top':'12px','margin-right': '10px', 'font-family': 'Arial, sans-serif', 'font-size': '16px'},
             )
-        ], style={'display': 'block', 'font-family': 'Arial, sans-serif', 'margin-bottom': '10px', 'font-size': '16px'}),  # Definindo a mesma fonte para as opções e margem inferior
+        ], style={'display': 'block', 'font-family': 'Arial, sans-serif', 'margin-bottom': '10px', 'font-size': '16px'}),
     ], className='mb-3')
 
     update_button = dbc.Button(
@@ -55,9 +53,9 @@ def create_layout(df):
         id='update-button',
         n_clicks=0,
         style={
-            'background-color': '#4169E1',  # Define a cor de fundo do botão
-            'color': 'white',               # Define a cor do texto para branco para melhor contraste
-            'fontWeight': 'bold',            # Mantém o texto em negrito
+            'background-color': '#4169E1',
+            'color': 'white',
+            'fontWeight': 'bold',
             'border-radius': '0px',
             'font-family': 'Arial, sans-serif',
             'font-size': '16px',
@@ -65,7 +63,6 @@ def create_layout(df):
         },
         className='mb-3'
     )
-
 
     anos_unicos = sorted(df['ano'].dropna().unique())
     ano_range_slider = dcc.RangeSlider(
@@ -78,26 +75,23 @@ def create_layout(df):
         className='mb-3'
     )
 
-   # Seção de Filtros com fundo mais escuro
     filter_section = html.Div([
         dbc.Row([
             dbc.Col(cidade_dropdown, width=12, lg=5),
             dbc.Col(hide_matching_checkbox, width=12, lg=4),
             dbc.Col(update_button, width=12, lg=3, className='d-flex justify-content-lg-end align-items-start'),
-        ], className='mb-3 justify-content-center'),  # Adicionando a classe justify-content-center para centralizar horizontalmente
+        ], className='mb-3 justify-content-center'),
         dbc.Row([
-            dbc.Col(ano_range_slider, width=12,),
-        ], className='mb-5 justify-content-center')  # Adicionando a classe justify-content-center para centralizar horizontalmente
-    ], style={'background-color': '#F0F8FF', 'padding': '20px', 'border': '0.5px solid #4169E1'})  # Ajuste de cor e padding conforme necessário
-
+            dbc.Col(ano_range_slider, width=12),
+        ], className='mb-5 justify-content-center')
+    ], style={'background-color': '#F0F8FF', 'padding': '20px', 'border': '0.5px solid #4169E1'})
 
     layout = html.Div([
         dbc.Container([
             dbc.Row([
                 dbc.Col([header], width=12),
             ]),
-            
-            filter_section,  # Inclusão da seção de filtros
+            filter_section,
             dbc.Row([
                 dbc.Col(html.Div([
                     dcc.Loading(
@@ -105,23 +99,30 @@ def create_layout(df):
                         type="circle",
                         children=dcc.Graph(id='grafo-direcional', className='mb-3')
                     )
-                ]), width=6, style={'margin-top': '20px'}),  # Adicionando margem superior de 20px
+                ]), width=6, style={'margin-top': '20px'}),
                 dbc.Col(html.Div([
                     dcc.Loading(
                         id="loading-grafico-colunas",
                         type="circle",
                         children=dcc.Graph(id='grafico-colunas', className='mb-3')
                     )
-                ]), width=6, style={'margin-top': '20px'}),  # Adicionando margem superior de 20px
-                
+                ]), width=6, style={'margin-top': '20px'}),
             ]),
-            
+            # dbc.Row([
+            #     dbc.Col(html.Div([
+            #         dcc.Loading(
+            #             id="loading-grafico-linha",
+            #             type="circle",
+            #             children=dcc.Graph(id='line-chart', className='mb-3')
+            #         )
+            #     ]), width=12),
+            # ]),
             dbc.Row([
                 dbc.Col(html.Div([
                     dcc.Loading(
-                        id="loading-grafico-linha",
+                        id="loading-endemic-corridor",
                         type="circle",
-                        children=dcc.Graph(id='line-chart', className='mb-3')
+                        children=dcc.Graph(id='endemic-corridor-chart', className='mb-3')
                     )
                 ]), width=12),
             ]),

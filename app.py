@@ -5,9 +5,7 @@ import networkx as nx
 import plotly.express as px
 import pandas as pd
 
-# Importação de funções personalizadas
-from malaria_layout import create_malaria_layout
-from info_layout import create_info_layout
+
 import layout
 import callbacks
 
@@ -17,7 +15,9 @@ app = Dash(__name__, external_stylesheets=external_stylesheets, suppress_callbac
 server = app.server
 
 # Carregar os dados
-df = load_data('Definitivo.csv', nrows=66887)
+df = pd.read_csv('Definitivo.csv', sep=',')
+df1 = pd.read_csv('corredor.csv', sep=',')
+
 df['notificacoes_proprias'] = df.groupby('mun_noti')['notifications'].transform('sum')
 df['notificacoes_total'] = df.groupby('mun_noti')['notifications'].transform('sum')
 G = create_graph(df)
@@ -38,13 +38,9 @@ app.layout = html.Div([
 def display_page(pathname):
     if pathname == '/':
         return layout.create_layout(df)
-    elif pathname == '/pagina_malaria':
-        return create_malaria_layout(df)
-    elif pathname == '/outra_pagina':
-        return create_info_layout(df)
     else:
         return '404 - Página não encontrada'
-
+    
 # Callback para atualizar o conteúdo quando o botão de atualização é clicado
 @app.callback(Output('url', 'pathname'), [Input('update-button', 'n_clicks')])
 def refresh_page(n_clicks):
@@ -57,7 +53,7 @@ def refresh_page(n_clicks):
         Output('grafo-direcional', 'figure'),
         Output('grafico-colunas', 'figure'),
         Output('cidade-dropdown', 'value'),
-        
+        Output('endemic-corridor-chart', 'figure')
     ],
     [
         Input('cidade-dropdown', 'value'),
@@ -70,14 +66,18 @@ def refresh_page(n_clicks):
 def update_graph_callback(selected_cidade, click_data, hide_matching_municipality, selected_ano, update_clicks):
     if update_clicks is not None and update_clicks > 0:
         # Lógica de atualização aqui
-        callbacks.update_graph_callback('Todas', None, df, G, pos, hide_matching_municipality,selected_ano)
+        grafo_direcional, grafico_colunas, selected_city = callbacks.update_graph_callback('Todas', None, df, G, pos, hide_matching_municipality, selected_ano)
     else:
         if selected_ano and 'Todos' not in selected_ano:
             df_filtered = df[df['ano'].between(int(selected_ano[0]), int(selected_ano[1]))]
         else:
             df_filtered = df.copy()
 
-        return callbacks.update_graph_callback(selected_cidade, click_data, df_filtered, G, pos, hide_matching_municipality, selected_ano)
+        grafo_direcional, grafico_colunas, selected_city = callbacks.update_graph_callback(selected_cidade, click_data, df_filtered, G, pos, hide_matching_municipality, selected_ano)
+
+    endemic_corridor_chart = callbacks.create_endemic_corridor(df1, selected_city, selected_ano)
+
+    return grafo_direcional, grafico_colunas, selected_city, endemic_corridor_chart
 
 @app.callback(
     Output('line-chart', 'figure'),
@@ -141,4 +141,5 @@ def set_default_intervalo(min_value, max_value):
     return [default_inicio, default_fim]
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(host='0.0.0.0', port=8050, debug=False)
+
